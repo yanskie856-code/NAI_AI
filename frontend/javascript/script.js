@@ -1113,6 +1113,14 @@
     return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 
+  function showAdminView(viewId) {
+    document.querySelectorAll('.admin-view').forEach(view => view.classList.toggle('hidden', view.id !== viewId));
+    document.querySelectorAll('.admin-nav').forEach(button => button.classList.toggle('admin-nav-active', button.dataset.adminView === viewId));
+    if (viewId === 'admin-overview-view') {
+      document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
+    }
+  }
+
   function copyText(input) {
     if (!input.value) return;
     navigator.clipboard.writeText(input.value);
@@ -1140,6 +1148,10 @@
     adminPortal.classList.add('hidden');
   });
 
+  document.querySelectorAll('.admin-nav').forEach(button => {
+    button.addEventListener('click', () => showAdminView(button.dataset.adminView));
+  });
+
   document.addEventListener('keydown', event => {
     if (event.key.toLowerCase() !== 'q') return;
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
@@ -1160,6 +1172,7 @@
         ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
         : await file.text();
       attachDocument(file.name, text);
+      document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
       knowledgeStatus.textContent = `${file.name} attached (${text.length.toLocaleString()} characters).`;
     } catch (error) {
       knowledgeStatus.textContent = 'Could not read this file.';

@@ -268,6 +268,60 @@ body {
   animation: admin-panel-in 180ms ease-out;
 }
 
+.admin-layout {
+  min-height: calc(100vh - 94px);
+}
+
+.admin-sidebar {
+  border-right: 1px solid rgba(216, 180, 254, 0.12);
+  padding-right: 1rem;
+}
+
+.admin-nav {
+  display: block;
+  width: 100%;
+  border-radius: 0.65rem;
+  color: rgba(233, 213, 255, 0.58);
+  padding: 0.7rem;
+  text-align: left;
+  font-size: 0.75rem;
+}
+
+.admin-nav:hover,
+.admin-nav-active {
+  background: rgba(126, 34, 206, 0.28);
+  color: #faf5ff;
+}
+
+.admin-content {
+  min-width: 0;
+}
+
+.admin-section {
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 1rem;
+  background: rgba(15, 7, 32, 0.48);
+  padding: 1rem;
+}
+
+.admin-metric {
+  display: flex;
+  min-height: 4.5rem;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 0.75rem;
+  background: rgba(76, 29, 149, 0.18);
+  padding: 0.75rem;
+  color: rgba(233, 213, 255, 0.55);
+  font-size: 0.7rem;
+}
+
+.admin-metric strong {
+  color: #f5f3ff;
+  font-size: 1.2rem;
+}
+
 .admin-input {
   width: 100%;
   border: 1px solid rgba(168, 85, 247, 0.3);
@@ -361,6 +415,22 @@ body {
     border-right: 0;
     border-bottom: 1px solid rgba(103, 232, 249, 0.12);
     padding: 0 0 0.75rem;
+  }
+
+  .admin-layout {
+    min-height: 0;
+  }
+
+  .admin-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(216, 180, 254, 0.12);
+    padding: 0 0 0.75rem;
+  }
+
+  .admin-nav {
+    display: inline-block;
+    width: auto;
+    margin-right: 0.25rem;
   }
 
   .dashboard-content {
