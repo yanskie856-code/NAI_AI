@@ -2,6 +2,8 @@
   "version": 2,
   "rewrites": [
     { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/css/:path*", "destination": "/frontend/css/:path*" },
+    { "source": "/javascript/:path*", "destination": "/frontend/javascript/:path*" },
     { "source": "/api/:path*", "destination": "/api" }
   ]
 }

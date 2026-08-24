@@ -13,7 +13,7 @@ supabase functions deploy assistant
 
 ## 2. Deploy the backend to Vercel
 
-Import this repository into Vercel with the project root set to the repository root. Vercel uses [`api/index.js`](../api/index.js) as the serverless backend entry point.
+Import this repository into Vercel with the project root set to the repository root. Vercel uses [`api/index.js`](../api/index.js) as the serverless backend entry point and serves the page from [`frontend/index.html`](../frontend/index.html).
 
 Add these Vercel project environment variables for **Production**, **Preview**, and **Development**:
 
