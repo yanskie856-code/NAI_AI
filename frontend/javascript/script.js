@@ -931,8 +931,6 @@
   const requesterEmail = document.getElementById('requester-email');
   const userDashboard = document.getElementById('user-dashboard');
   const authStatus = document.getElementById('auth-status');
-  const authEmail = document.getElementById('auth-email');
-  const authPassword = document.getElementById('auth-password');
   const requestForm = document.getElementById('system-request-form');
   const requestStatus = document.getElementById('request-status');
   const requestList = document.getElementById('request-list');
@@ -1044,25 +1042,6 @@
 
   document.getElementById('close-dashboard').addEventListener('click', () => userDashboard.classList.add('hidden'));
 
-  async function authenticate(mode) {
-    if (supabaseClient) {
-      const result = mode === 'google'
-        ? await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
-        : mode === 'signup'
-          ? await supabaseClient.auth.signUp({ email: authEmail.value, password: authPassword.value })
-          : await supabaseClient.auth.signInWithPassword({ email: authEmail.value, password: authPassword.value });
-      if (result.error) authStatus.textContent = result.error.message;
-    } else if (mode !== 'google' && authEmail.value.trim()) {
-      localStorage.setItem('nai-demo-user', JSON.stringify({ email: authEmail.value.trim() }));
-    } else if (mode === 'google') {
-      localStorage.setItem('nai-demo-user', JSON.stringify({ email: 'google-user@demo.local' }));
-    }
-    updateAuthStatus();
-  }
-
-  document.getElementById('email-sign-in').addEventListener('click', () => authenticate('signin'));
-  document.getElementById('email-sign-up').addEventListener('click', () => authenticate('signup'));
-  document.getElementById('google-sign-in').addEventListener('click', () => authenticate('google'));
   document.getElementById('sign-out').addEventListener('click', async () => {
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-user');
