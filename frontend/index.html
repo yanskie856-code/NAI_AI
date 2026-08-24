@@ -13,9 +13,8 @@
 </head>
 <body class="min-h-screen text-slate-100 flex items-center justify-center p-6">
   <!-- AUTHENTICATION GATE -->
-  <main id="auth-screen" class="auth-screen fixed inset-0 z-[70]">
+  <main id="auth-screen" class="auth-screen fixed inset-0 z-[40] pointer-events-none">
     <section id="auth-welcome" class="auth-welcome">
-      <div class="nai-mark" aria-hidden="true">NAI</div>
       <p class="auth-kicker">Your intelligent system companion</p>
       <h1>Understand more.<br><span>Move faster.</span></h1>
       <p class="auth-welcome-copy">Connect your system knowledge to one focused AI workspace.</p>
@@ -25,7 +24,7 @@
       </div>
     </section>
 
-    <section id="login-card" class="auth-card auth-form-card hidden">
+    <section id="login-card" class="auth-card auth-form-card hidden pointer-events-auto">
       <button type="button" class="auth-back" data-auth-back>Back to welcome</button>
       <p class="auth-kicker">Welcome back</p>
       <h2>Log in to NAI</h2>
@@ -41,7 +40,7 @@
       <p id="auth-message" class="mt-4 min-h-5 text-center text-xs text-cyan-100/65" aria-live="polite"></p>
     </section>
 
-    <section id="register-card" class="auth-card auth-form-card hidden">
+    <section id="register-card" class="auth-card auth-form-card hidden pointer-events-auto">
       <button type="button" class="auth-back" data-auth-back>Back to welcome</button>
       <p class="auth-kicker">Start with NAI</p>
       <h2>Create your account</h2>
