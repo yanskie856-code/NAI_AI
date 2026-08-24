@@ -863,6 +863,21 @@
   };
 
   async function getNAIResponse(userText) {
+    const embedToken = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
+    if (embedToken && supabaseConfig.backendUrl) {
+      try {
+        const response = await fetch(`${supabaseConfig.backendUrl}/api/assistant`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-nai-token': embedToken },
+          body: JSON.stringify({ message: userText })
+        });
+        const data = await response.json();
+        if (response.ok && data.reply) return data.reply;
+      } catch (error) {
+        console.warn('NAI backend unavailable; using local knowledge.');
+      }
+    }
+
     const context = attachedSystem.getContext
       ? await attachedSystem.getContext()
       : null;
@@ -925,6 +940,8 @@
   const supabaseClient = supabaseConfig.url && supabaseConfig.anonKey && window.supabase
     ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
     : null;
+  const authScreen = document.getElementById('auth-screen');
+  const authMessage = document.getElementById('auth-message');
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -956,6 +973,67 @@
     const user = await getCurrentUser();
     authStatus.textContent = user ? `Signed in as ${user.email || user.user_metadata?.full_name || 'connected user'}.` : 'Sign in to request access to a connected system.';
     document.getElementById('sign-out').classList.toggle('hidden', !user);
+  }
+
+  function showDashboard() {
+    authScreen.classList.add('hidden');
+    userDashboard.classList.remove('hidden');
+    renderRequests();
+    updateAuthStatus();
+  }
+
+  function setAuthTab(mode) {
+    const login = mode === 'login';
+    document.getElementById('login-form').classList.toggle('hidden', !login);
+    document.getElementById('register-form').classList.toggle('hidden', login);
+    document.getElementById('show-login').classList.toggle('auth-tab-active', login);
+    document.getElementById('show-register').classList.toggle('auth-tab-active', !login);
+  }
+
+  document.getElementById('show-login').addEventListener('click', () => setAuthTab('login'));
+  document.getElementById('show-register').addEventListener('click', () => setAuthTab('register'));
+
+  async function submitAuth(mode) {
+    const register = mode === 'register';
+    const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
+    const password = document.getElementById(register ? 'register-password' : 'login-password').value;
+    const name = document.getElementById('register-name').value.trim();
+    if (supabaseClient) {
+      const result = register
+        ? await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } })
+        : await supabaseClient.auth.signInWithPassword({ email, password });
+      if (result.error) { authMessage.textContent = result.error.message; return; }
+      if (register && !result.data.session) { authMessage.textContent = 'Verify your email, then log in.'; return; }
+    } else {
+      localStorage.setItem('nai-demo-user', JSON.stringify({ email, name }));
+    }
+    showDashboard();
+  }
+
+  document.getElementById('login-form').addEventListener('submit', event => {
+    event.preventDefault();
+    submitAuth('login');
+  });
+  document.getElementById('register-form').addEventListener('submit', event => {
+    event.preventDefault();
+    submitAuth('register');
+  });
+  document.getElementById('auth-google').addEventListener('click', async () => {
+    if (supabaseClient) {
+      const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+      if (error) authMessage.textContent = error.message;
+      return;
+    }
+    localStorage.setItem('nai-demo-user', JSON.stringify({ email: 'google-user@demo.local', name: 'Google user' }));
+    showDashboard();
+  });
+
+  if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      if (session) showDashboard();
+    });
+  } else if (getDemoUser()) {
+    showDashboard();
   }
 
   document.getElementById('dashboard-trigger').addEventListener('click', () => {
