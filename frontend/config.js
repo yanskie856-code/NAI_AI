@@ -2,5 +2,6 @@
 window.NAI_SUPABASE_CONFIG = {
   url: 'https://yqiycsjgtdsrvjcdcbch.supabase.co',
   anonKey: 'sb_publishable_zHr5CptKZ6z8J1hupc6X6Q_NAFjYX-h',
-  backendUrl: ''
+  backendUrl: '',
+  appUrl: 'https://nai-ai.yanskie856.workers.dev'
 };

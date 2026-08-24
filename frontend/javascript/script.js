@@ -1032,7 +1032,7 @@
   });
   async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
-      const redirectTo = `${window.location.origin}${window.location.pathname}`;
+      const redirectTo = supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`;
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo }
@@ -1070,7 +1070,8 @@
       return;
     }
     if (supabaseClient) {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+      const redirectTo = supabaseConfig.appUrl || window.location.href;
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
       authMessage.textContent = error ? error.message : 'Password reset instructions sent.';
     } else {
       authMessage.textContent = 'Password reset is available after Supabase is connected.';
