@@ -913,6 +913,114 @@
   const systemName = document.getElementById('system-name');
   const embedLink = document.getElementById('embed-link');
   const embedCode = document.getElementById('embed-code');
+  const requesterEmail = document.getElementById('requester-email');
+  const userDashboard = document.getElementById('user-dashboard');
+  const authStatus = document.getElementById('auth-status');
+  const authEmail = document.getElementById('auth-email');
+  const authPassword = document.getElementById('auth-password');
+  const requestForm = document.getElementById('system-request-form');
+  const requestStatus = document.getElementById('request-status');
+  const requestList = document.getElementById('request-list');
+  const supabaseConfig = window.NAI_SUPABASE_CONFIG || {};
+  const supabaseClient = supabaseConfig.url && supabaseConfig.anonKey && window.supabase
+    ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
+    : null;
+
+  function getDemoUser() {
+    const savedUser = localStorage.getItem('nai-demo-user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+  }
+
+  async function getCurrentUser() {
+    if (supabaseClient) {
+      const { data } = await supabaseClient.auth.getUser();
+      return data.user;
+    }
+    return getDemoUser();
+  }
+
+  function renderRequests() {
+    const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
+    requestList.innerHTML = requests.length
+      ? requests.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.embedLink ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embedLink)}">Open connected NAI</a>` : ''}</article>`).join('')
+      : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+  }
+
+  async function updateAuthStatus() {
+    const user = await getCurrentUser();
+    authStatus.textContent = user ? `Signed in as ${user.email || user.user_metadata?.full_name || 'connected user'}.` : 'Sign in to request access to a connected system.';
+    document.getElementById('sign-out').classList.toggle('hidden', !user);
+  }
+
+  document.getElementById('dashboard-trigger').addEventListener('click', () => {
+    userDashboard.classList.remove('hidden');
+    renderRequests();
+    updateAuthStatus();
+  });
+
+  document.getElementById('close-dashboard').addEventListener('click', () => userDashboard.classList.add('hidden'));
+
+  async function authenticate(mode) {
+    if (supabaseClient) {
+      const result = mode === 'google'
+        ? await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
+        : mode === 'signup'
+          ? await supabaseClient.auth.signUp({ email: authEmail.value, password: authPassword.value })
+          : await supabaseClient.auth.signInWithPassword({ email: authEmail.value, password: authPassword.value });
+      if (result.error) authStatus.textContent = result.error.message;
+    } else if (mode !== 'google' && authEmail.value.trim()) {
+      localStorage.setItem('nai-demo-user', JSON.stringify({ email: authEmail.value.trim() }));
+    } else if (mode === 'google') {
+      localStorage.setItem('nai-demo-user', JSON.stringify({ email: 'google-user@demo.local' }));
+    }
+    updateAuthStatus();
+  }
+
+  document.getElementById('email-sign-in').addEventListener('click', () => authenticate('signin'));
+  document.getElementById('email-sign-up').addEventListener('click', () => authenticate('signup'));
+  document.getElementById('google-sign-in').addEventListener('click', () => authenticate('google'));
+  document.getElementById('sign-out').addEventListener('click', async () => {
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    localStorage.removeItem('nai-demo-user');
+    updateAuthStatus();
+  });
+
+  requestForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const user = await getCurrentUser();
+    if (!user) {
+      requestStatus.textContent = 'Sign in before sending a request.';
+      return;
+    }
+
+    const request = {
+      id: crypto.randomUUID(),
+      email: user.email,
+      system: document.getElementById('request-system').value.trim(),
+      message: document.getElementById('request-message').value.trim(),
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    if (supabaseClient) {
+      const { error } = await supabaseClient.from('system_requests').insert({ requester_id: user.id, email: user.email, system_name: request.system, message: request.message });
+      if (error) { requestStatus.textContent = error.message; return; }
+    } else {
+      const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
+      requests.push(request);
+      localStorage.setItem('nai-demo-requests', JSON.stringify(requests));
+    }
+    requestForm.reset();
+    requestStatus.textContent = 'Request sent to the admin.';
+    renderRequests();
+  });
+
+  document.getElementById('refresh-requests').addEventListener('click', renderRequests);
 
   function createEmbedToken() {
     const bytes = new Uint8Array(18);
@@ -980,7 +1088,7 @@
     const url = `${window.location.origin}${window.location.pathname}#nai-token=${token}`;
     embedLink.value = url;
     embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" frameborder="0"></iframe>`;
-    localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, documents: attachedSystem.documents }));
+    localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
   });
 
   document.getElementById('copy-link').addEventListener('click', () => copyText(embedLink));

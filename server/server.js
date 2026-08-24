@@ -16,6 +16,7 @@ for (const name of required) {
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5500';
+const adminEmails = new Set((process.env.ADMIN_EMAILS || '').split(',').map(email => email.trim().toLowerCase()).filter(Boolean));
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
@@ -49,6 +50,11 @@ async function requireUser(request, response, next) {
   next();
 }
 
+function requireAdmin(request, response, next) {
+  if (!adminEmails.has(request.user.email?.toLowerCase())) return response.status(403).json({ error: 'Admin access required.' });
+  next();
+}
+
 async function ownsSystem(userId, systemId) {
   const { data } = await admin.from('systems').select('id, name').eq('id', systemId).eq('owner_id', userId).single();
   return data;
@@ -63,6 +69,20 @@ app.post('/api/admin/systems', requireUser, async (request, response) => {
   const { data, error } = await admin.from('systems').insert({ owner_id: request.user.id, name }).select('id, name').single();
   if (error) return response.status(400).json({ error: error.message });
   response.status(201).json(data);
+});
+
+app.get('/api/admin/requests', requireUser, requireAdmin, async (_request, response) => {
+  const { data, error } = await admin.from('system_requests').select('*').order('created_at', { ascending: false });
+  if (error) return response.status(400).json({ error: error.message });
+  response.json(data);
+});
+
+app.patch('/api/admin/requests/:requestId', requireUser, requireAdmin, async (request, response) => {
+  const status = ['pending', 'approved', 'rejected'].includes(request.body.status) ? request.body.status : null;
+  if (!status) return response.status(400).json({ error: 'Invalid request status.' });
+  const { data, error } = await admin.from('system_requests').update({ status, admin_note: request.body.adminNote || null, updated_at: new Date().toISOString() }).eq('id', request.params.requestId).select('*').single();
+  if (error) return response.status(400).json({ error: error.message });
+  response.json(data);
 });
 
 app.post('/api/admin/systems/:systemId/knowledge', requireUser, upload.single('file'), async (request, response) => {

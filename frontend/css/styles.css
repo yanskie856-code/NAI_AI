@@ -78,6 +78,41 @@ body {
   background: rgba(126, 34, 206, 0.65);
 }
 
+.dashboard-section {
+  border: 1px solid rgba(103, 232, 249, 0.14);
+  border-radius: 1rem;
+  background: rgba(8, 27, 38, 0.55);
+  padding: 1rem;
+}
+
+.dashboard-google {
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 0.75rem;
+  background: rgba(14, 116, 144, 0.35);
+  color: #ecfeff;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.75rem;
+  transition: background 150ms ease;
+}
+
+.dashboard-google:hover {
+  background: rgba(8, 145, 178, 0.55);
+}
+
+.request-item {
+  border-left: 2px solid rgba(34, 211, 238, 0.7);
+  border-radius: 0.5rem;
+  background: rgba(8, 47, 73, 0.35);
+  padding: 0.75rem;
+}
+
+.request-status {
+  color: #a5f3fc;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 @keyframes admin-panel-in {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }

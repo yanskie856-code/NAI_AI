@@ -29,9 +29,23 @@ create table public.embed_tokens (
   created_at timestamptz not null default now()
 );
 
+create table public.system_requests (
+  id uuid primary key default gen_random_uuid(),
+  requester_id uuid not null references auth.users(id) on delete cascade,
+  email text not null check (char_length(email) <= 320),
+  system_name text not null check (char_length(system_name) between 1 and 120),
+  message text not null check (char_length(message) between 1 and 4000),
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  admin_note text,
+  embed_token_id uuid references public.embed_tokens(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.systems enable row level security;
 alter table public.knowledge_documents enable row level security;
 alter table public.embed_tokens enable row level security;
+alter table public.system_requests enable row level security;
 
 create policy "Owners manage their systems"
   on public.systems for all to authenticated
@@ -61,6 +75,11 @@ create policy "Owners manage their tokens"
     )
   );
 
+create policy "Users manage their requests"
+  on public.system_requests for all to authenticated
+  using (requester_id = auth.uid())
+  with check (requester_id = auth.uid() and email = coalesce(auth.jwt() ->> 'email', email));
+
 insert into storage.buckets (id, name, public)
 values ('knowledge', 'knowledge', false)
 on conflict (id) do nothing;
@@ -79,3 +98,4 @@ create policy "Owners delete knowledge files"
 
 create index knowledge_documents_system_id_idx on public.knowledge_documents(system_id);
 create index embed_tokens_hash_idx on public.embed_tokens(token_hash);
+create index system_requests_requester_id_idx on public.system_requests(requester_id);

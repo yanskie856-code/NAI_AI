@@ -105,3 +105,16 @@ const supabase = window.supabase.createClient(
 Use Supabase Auth for the admin portal. Call `create-embed-token` with the authenticated user session, then send the returned token to the `assistant` function in the `x-nai-token` header.
 
 Do not put `SUPABASE_SERVICE_ROLE_KEY` in `index.html`, `script.js`, or any browser-delivered file.
+
+For the browser dashboard, edit [`frontend/config.js`](../frontend/config.js) with the Supabase project URL and public anon key. The anon key may be public because the database tables use RLS:
+
+```js
+window.NAI_SUPABASE_CONFIG = {
+  url: 'https://YOUR_PROJECT.supabase.co',
+  anonKey: 'YOUR_PUBLIC_ANON_KEY'
+};
+```
+
+Enable Google in **Supabase Dashboard -> Authentication -> Providers -> Google** and add your deployed frontend URL as an allowed redirect URL.
+
+For the Node backend, add `ADMIN_EMAILS=your-google-email@example.com` to `server/.env`. Only those authenticated emails can review requests through the admin routes.
