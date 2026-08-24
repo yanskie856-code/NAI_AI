@@ -1032,12 +1032,15 @@
   });
   async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
-      const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+      const redirectTo = `${window.location.origin}${window.location.pathname}`;
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo }
+      });
       if (error) messageElement.textContent = error.message;
       return;
     }
-    localStorage.setItem('nai-demo-user', JSON.stringify({ email: 'google-user@demo.local', name: 'Google user' }));
-    showDashboard();
+    messageElement.textContent = 'Connect Supabase to use Google sign-in.';
   }
 
   document.getElementById('auth-google-login').addEventListener('click', () => signInWithGoogle(authMessage));
