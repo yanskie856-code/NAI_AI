@@ -940,6 +940,7 @@
     : null;
   const authScreen = document.getElementById('auth-screen');
   const authMessage = document.getElementById('auth-message');
+  const registerMessage = document.getElementById('register-message');
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -985,7 +986,13 @@
     userDashboard.classList.add('hidden');
     authScreen.classList.remove('hidden');
     authMessage.textContent = 'You have been signed out.';
-    setAuthTab('login');
+    showAuthView('welcome');
+  }
+
+  function showAuthView(view) {
+    document.getElementById('auth-welcome').classList.toggle('hidden', view !== 'welcome');
+    document.getElementById('login-card').classList.toggle('hidden', view !== 'login');
+    document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
   }
 
   function showDashboardView(viewId) {
@@ -994,16 +1001,11 @@
     if (viewId === 'dashboard-access-view') renderRequests();
   }
 
-  function setAuthTab(mode) {
-    const login = mode === 'login';
-    document.getElementById('login-form').classList.toggle('hidden', !login);
-    document.getElementById('register-form').classList.toggle('hidden', login);
-    document.getElementById('show-login').classList.toggle('auth-tab-active', login);
-    document.getElementById('show-register').classList.toggle('auth-tab-active', !login);
-  }
-
-  document.getElementById('show-login').addEventListener('click', () => setAuthTab('login'));
-  document.getElementById('show-register').addEventListener('click', () => setAuthTab('register'));
+  document.getElementById('welcome-login').addEventListener('click', () => showAuthView('login'));
+  document.getElementById('welcome-register').addEventListener('click', () => showAuthView('register'));
+  document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
+  document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
+  document.querySelectorAll('[data-auth-back]').forEach(button => button.addEventListener('click', () => showAuthView('welcome')));
 
   async function submitAuth(mode) {
     const register = mode === 'register';
@@ -1014,8 +1016,8 @@
       const result = register
         ? await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } })
         : await supabaseClient.auth.signInWithPassword({ email, password });
-      if (result.error) { authMessage.textContent = result.error.message; return; }
-      if (register && !result.data.session) { authMessage.textContent = 'Verify your email, then log in.'; return; }
+      if (result.error) { (register ? registerMessage : authMessage).textContent = result.error.message; return; }
+      if (register && !result.data.session) { registerMessage.textContent = 'Verify your email, then log in.'; return; }
     } else {
       localStorage.setItem('nai-demo-user', JSON.stringify({ email, name }));
     }
@@ -1030,15 +1032,18 @@
     event.preventDefault();
     submitAuth('register');
   });
-  document.getElementById('auth-google').addEventListener('click', async () => {
+  async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
       const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
-      if (error) authMessage.textContent = error.message;
+      if (error) messageElement.textContent = error.message;
       return;
     }
     localStorage.setItem('nai-demo-user', JSON.stringify({ email: 'google-user@demo.local', name: 'Google user' }));
     showDashboard();
-  });
+  }
+
+  document.getElementById('auth-google-login').addEventListener('click', () => signInWithGoogle(authMessage));
+  document.getElementById('auth-google-register').addEventListener('click', () => signInWithGoogle(registerMessage));
 
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
