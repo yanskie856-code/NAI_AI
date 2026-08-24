@@ -69,6 +69,7 @@ body {
   left: 50%;
   width: min(26rem, calc(100% - 2rem));
   transform: translate(-50%, -50%);
+  text-align: center;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), 0 0 40px rgba(8, 145, 178, 0.12);
 }
 
@@ -85,6 +86,7 @@ body {
   color: rgba(207, 250, 254, 0.72);
   font-size: 0.72rem;
   font-weight: 600;
+  text-align: left;
 }
 
 .auth-form-card .admin-input {
@@ -93,7 +95,6 @@ body {
 
 .auth-secondary,
 .auth-switch,
-.auth-back,
 .auth-forgot {
   border-radius: 0.75rem;
   font-size: 0.8rem;
@@ -120,14 +121,9 @@ body {
   background: rgba(8, 145, 178, 0.18);
 }
 
-.auth-back,
 .auth-switch {
   color: rgba(165, 243, 252, 0.65);
   padding: 0.35rem 0;
-}
-
-.auth-back {
-  margin-bottom: 2.2rem;
 }
 
 .auth-switch {

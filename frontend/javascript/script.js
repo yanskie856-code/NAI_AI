@@ -1005,8 +1005,6 @@
   document.getElementById('welcome-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
-  document.querySelectorAll('[data-auth-back]').forEach(button => button.addEventListener('click', () => showAuthView('welcome')));
-
   async function submitAuth(mode) {
     const register = mode === 'register';
     const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
