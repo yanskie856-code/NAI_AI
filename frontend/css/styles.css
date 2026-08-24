@@ -439,7 +439,9 @@ body {
   .auth-action-bar {
     bottom: calc(1rem + env(safe-area-inset-bottom));
     left: 1rem;
-    width: min(13rem, calc(100% - 12rem));
+    right: auto;
+    width: calc(100% - 12rem);
+    max-width: 13rem;
     flex-direction: column;
     gap: 0.5rem;
     transform: none;
@@ -479,6 +481,8 @@ body {
     border-right: 0;
     border-bottom: 1px solid rgba(103, 232, 249, 0.12);
     padding: 0 0 0.75rem;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   .admin-layout {
@@ -489,12 +493,15 @@ body {
     border-right: 0;
     border-bottom: 1px solid rgba(216, 180, 254, 0.12);
     padding: 0 0 0.75rem;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   .admin-nav {
-    display: inline-block;
+    display: inline-flex;
     width: auto;
     margin-right: 0.25rem;
+    white-space: nowrap;
   }
 
   .dashboard-content {
@@ -502,8 +509,9 @@ body {
   }
 
   .dashboard-nav {
-    display: inline-block;
+    display: inline-flex;
     width: auto;
     margin-right: 0.25rem;
+    white-space: nowrap;
   }
 }
