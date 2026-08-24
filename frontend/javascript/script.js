@@ -1054,18 +1054,26 @@
     showDashboard();
   }
 
-  document.getElementById('dashboard-trigger').addEventListener('click', () => {
-    userDashboard.classList.remove('hidden');
-    renderRequests();
-    updateAuthStatus();
-  });
-
   document.getElementById('close-dashboard').addEventListener('click', () => userDashboard.classList.add('hidden'));
 
   document.getElementById('sign-out').addEventListener('click', async () => {
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-user');
     showAuthScreen();
+  });
+
+  document.querySelector('.auth-forgot').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      authMessage.textContent = 'Enter your email first.';
+      return;
+    }
+    if (supabaseClient) {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+      authMessage.textContent = error ? error.message : 'Password reset instructions sent.';
+    } else {
+      authMessage.textContent = 'Password reset is available after Supabase is connected.';
+    }
   });
 
   document.querySelector('[data-dashboard-view="dashboard-overview-view"]').addEventListener('click', () => showDashboardView('dashboard-overview-view'));

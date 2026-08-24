@@ -20,15 +20,6 @@ body {
   pointer-events: auto;
 }
 
-.nai-mark {
-  color: #cffafe;
-  font-size: clamp(4rem, 13vw, 9rem);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-shadow: 0 0 36px rgba(34, 211, 238, 0.35);
-}
-
 .auth-kicker {
   color: rgba(165, 243, 252, 0.7);
   font-size: 0.7rem;
@@ -88,15 +79,35 @@ body {
   font-weight: 700;
 }
 
+.auth-field {
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(207, 250, 254, 0.72);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .auth-form-card .admin-input {
   margin-top: 0.2rem;
 }
 
 .auth-secondary,
 .auth-switch,
-.auth-back {
+.auth-back,
+.auth-forgot {
   border-radius: 0.75rem;
   font-size: 0.8rem;
+}
+
+.auth-forgot {
+  display: block;
+  margin: 0.1rem 0 0.3rem auto;
+  color: rgba(165, 243, 252, 0.6);
+  font-size: 0.7rem;
+}
+
+.auth-forgot:hover {
+  color: #67e8f9;
 }
 
 .auth-secondary {
@@ -146,6 +157,11 @@ body {
 .auth-card {
   animation: auth-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: center;
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(7, 16, 24, 0.98), rgba(4, 10, 17, 0.96));
+  padding: 1.75rem;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), 0 0 40px rgba(8, 145, 178, 0.12);
 }
 
 .auth-tab {
