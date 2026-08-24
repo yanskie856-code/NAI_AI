@@ -56,6 +56,27 @@ body {
   padding-right: 1rem;
 }
 
+.dashboard-content {
+  grid-column: span 2;
+}
+
+.dashboard-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 1px solid rgba(103, 232, 249, 0.12);
+  border-radius: 0.75rem;
+  background: rgba(8, 47, 73, 0.28);
+  padding: 0.85rem;
+  color: rgba(207, 250, 254, 0.55);
+  font-size: 0.7rem;
+}
+
+.dashboard-metric strong {
+  color: #ecfeff;
+  font-size: 1.35rem;
+}
+
 .dashboard-nav {
   display: block;
   width: 100%;
@@ -204,6 +225,10 @@ body {
     border-right: 0;
     border-bottom: 1px solid rgba(103, 232, 249, 0.12);
     padding: 0 0 0.75rem;
+  }
+
+  .dashboard-content {
+    grid-column: auto;
   }
 
   .dashboard-nav {

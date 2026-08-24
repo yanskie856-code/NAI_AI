@@ -118,11 +118,20 @@
       <div class="grid gap-6 p-6 lg:grid-cols-[180px_0.9fr_1.1fr]">
         <aside class="dashboard-sidebar">
           <p class="mb-3 text-[10px] uppercase tracking-[0.18em] text-cyan-200/50">Workspace</p>
-          <button class="dashboard-nav dashboard-nav-active" type="button">Overview</button>
-          <button class="dashboard-nav" type="button" id="dashboard-request-nav">Request system</button>
-          <button class="dashboard-nav" type="button" id="dashboard-refresh-nav">Refresh status</button>
+          <button class="dashboard-nav dashboard-nav-active" type="button" data-dashboard-view="dashboard-overview-view">Overview</button>
+          <button class="dashboard-nav" type="button" id="dashboard-request-nav" data-dashboard-view="dashboard-request-view">Request system</button>
+          <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">Access requests</button>
         </aside>
-        <section class="space-y-4">
+        <div class="dashboard-content">
+        <section id="dashboard-overview-view" class="dashboard-view dashboard-section space-y-4">
+          <h3 class="text-sm font-semibold text-white">Workspace overview</h3>
+          <p class="text-sm leading-relaxed text-cyan-100/65">Request access to a system, send its guide to the admin, and follow the connection status from one workspace.</p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="dashboard-metric"><span>Requests</span><strong id="overview-request-count">0</strong></div>
+            <div class="dashboard-metric"><span>Connection</span><strong>Ready</strong></div>
+          </div>
+        </section>
+        <section id="dashboard-request-view" class="dashboard-view hidden space-y-4">
           <form id="system-request-form" class="dashboard-section space-y-3">
             <div>
               <h3 class="text-sm font-semibold text-white">Request system access</h3>
@@ -135,7 +144,7 @@
           </form>
         </section>
 
-        <section class="dashboard-section">
+        <section id="dashboard-access-view" class="dashboard-view dashboard-section hidden">
           <div class="flex items-center justify-between gap-3">
             <div>
               <h3 class="text-sm font-semibold text-white">Access requests</h3>
@@ -147,6 +156,7 @@
             <p class="text-xs text-cyan-100/50">No requests yet.</p>
           </div>
         </section>
+        </div>
       </div>
     </div>
   </div>

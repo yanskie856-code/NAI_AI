@@ -962,6 +962,7 @@
 
   function renderRequests() {
     const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
+    document.getElementById('overview-request-count').textContent = requests.length;
     requestList.innerHTML = requests.length
       ? requests.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.embedLink ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embedLink)}">Open connected NAI</a>` : ''}</article>`).join('')
       : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
@@ -978,6 +979,19 @@
     userDashboard.classList.remove('hidden');
     renderRequests();
     updateAuthStatus();
+  }
+
+  function showAuthScreen() {
+    userDashboard.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    authMessage.textContent = 'You have been signed out.';
+    setAuthTab('login');
+  }
+
+  function showDashboardView(viewId) {
+    document.querySelectorAll('.dashboard-view').forEach(view => view.classList.toggle('hidden', view.id !== viewId));
+    document.querySelectorAll('.dashboard-nav').forEach(button => button.classList.toggle('dashboard-nav-active', button.dataset.dashboardView === viewId));
+    if (viewId === 'dashboard-access-view') renderRequests();
   }
 
   function setAuthTab(mode) {
@@ -1029,6 +1043,7 @@
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (session) showDashboard();
+      else if (_event === 'SIGNED_OUT') showAuthScreen();
     });
   } else if (getDemoUser()) {
     showDashboard();
@@ -1045,7 +1060,14 @@
   document.getElementById('sign-out').addEventListener('click', async () => {
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-user');
-    updateAuthStatus();
+    showAuthScreen();
+  });
+
+  document.querySelector('[data-dashboard-view="dashboard-overview-view"]').addEventListener('click', () => showDashboardView('dashboard-overview-view'));
+  document.getElementById('dashboard-request-nav').addEventListener('click', () => showDashboardView('dashboard-request-view'));
+  document.getElementById('dashboard-refresh-nav').addEventListener('click', () => {
+    renderRequests();
+    showDashboardView('dashboard-access-view');
   });
 
   requestForm.addEventListener('submit', async event => {
@@ -1075,6 +1097,7 @@
     requestForm.reset();
     requestStatus.textContent = 'Request sent to the admin.';
     renderRequests();
+    showDashboardView('dashboard-access-view');
   });
 
   document.getElementById('refresh-requests').addEventListener('click', renderRequests);
