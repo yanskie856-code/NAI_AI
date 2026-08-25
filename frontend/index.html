@@ -282,14 +282,15 @@
             Requester email
             <input id="requester-email" type="email" placeholder="user@example.com" class="admin-input mt-2" />
           </label>
-          <label class="admin-upload flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-purple-400/40 bg-purple-950/30 p-6 text-center hover:border-pink-400/70 transition">
+          <label id="knowledge-dropzone" class="admin-upload flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-purple-400/40 bg-purple-950/30 p-6 text-center hover:border-pink-400/70 transition">
             <span class="text-2xl text-pink-300">+</span>
-            <span class="text-sm font-medium text-purple-100">Attach a guide</span>
-            <span class="text-xs text-purple-300/60">.txt or .docx, up to 5 MB</span>
+            <span class="text-sm font-medium text-purple-100">Drop a TXT or DOCX guide here</span>
+            <span class="text-xs text-purple-300/60">or choose a file, up to 5 MB</span>
             <input id="knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" />
           </label>
           <div id="knowledge-status" class="min-h-6 text-xs text-purple-200/70" aria-live="polite">No guide attached yet.</div>
-          <button id="generate-link" type="button" class="w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-950/30 hover:from-purple-500 hover:to-pink-500 transition">Generate secure embed link</button>
+          <div class="grid gap-3 sm:grid-cols-2"><label class="block text-sm font-medium text-purple-100">Mascot position<select id="embed-position" class="admin-input mt-2"><option value="bottom-right">Bottom right</option><option value="bottom-left">Bottom left</option><option value="top-right">Top right</option><option value="top-left">Top left</option></select></label><label class="block text-sm font-medium text-purple-100">Widget mode<select id="embed-mode" class="admin-input mt-2"><option value="mascot">Mascot and conversation</option><option value="conversation">Conversation panel</option></select></label></div>
+          <button id="generate-link" type="button" class="w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-950/30 hover:from-purple-500 hover:to-pink-500 transition">Generate secure client code</button>
             </div>
           </section>
 
