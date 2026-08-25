@@ -956,9 +956,9 @@
   let pendingSignup = false;
   let logoutTransitionActive = false;
 
-  function setPendingVerification(email, password = null) {
-    pendingVerification = { email, ...(password ? { password } : {}) };
-    sessionStorage.setItem('nai-pending-verification', JSON.stringify({ email }));
+  function setPendingVerification(email, password = null, nextView = 'login') {
+    pendingVerification = { email, nextView, ...(password ? { password } : {}) };
+    sessionStorage.setItem('nai-pending-verification', JSON.stringify({ email, nextView }));
   }
 
   function clearPendingVerification() {
@@ -1081,6 +1081,14 @@
     logoutTransitionActive = true;
     showLogoutLoader(message);
     if (supabaseClient) await supabaseClient.auth.signOut();
+    document.querySelectorAll('#login-form, #register-form, #admin-login-form, #email-verification-form, #password-setup-form').forEach(form => form.reset());
+    document.getElementById('verification-email').textContent = '';
+    authMessage.textContent = '';
+    registerMessage.textContent = '';
+    adminAuthMessage.textContent = '';
+    verificationMessage.textContent = '';
+    passwordSetupMessage.textContent = '';
+    clearPendingVerification();
     localStorage.removeItem('nai-demo-user');
     localStorage.removeItem('nai-demo-admin');
     await new Promise(resolve => setTimeout(resolve, 520));
@@ -1150,7 +1158,7 @@
     } else {
       try {
         if (!(await isCustomEmailVerified(email))) {
-          setPendingVerification(email, password);
+          setPendingVerification(email, password, 'login');
           document.getElementById('verification-email').textContent = email;
           verificationMessage.textContent = 'Verify your email before logging in. A new code can be sent below.';
           showAuthView('verification');
@@ -1197,7 +1205,7 @@
         return;
       }
       if (register && (!result.data.session || !result.data.user?.email_confirmed_at)) {
-        setPendingVerification(email, password);
+        setPendingVerification(email, password, 'login');
         document.getElementById('verification-email').textContent = email;
         verificationMessage.textContent = 'A verification email was sent. Enter its code or click its confirmation link.';
         if (result.data.session) await supabaseClient.auth.signOut();
@@ -1245,10 +1253,17 @@
       return;
     }
     const verifiedEmail = pendingVerification.email;
+    const nextView = pendingVerification.nextView || 'login';
     clearPendingVerification();
-    document.getElementById('login-email').value = verifiedEmail;
-    authMessage.textContent = 'Email verified. Log in to continue.';
-    showAuthView('login');
+    if (nextView === 'password') {
+      showAuthView('password');
+    } else if (nextView === 'dashboard') {
+      showDashboard();
+    } else {
+      document.getElementById('login-email').value = verifiedEmail;
+      authMessage.textContent = 'Email verified. Log in to continue.';
+      showAuthView('login');
+    }
   });
   document.getElementById('resend-verification').addEventListener('click', async () => {
     if (!pendingVerification) return;
@@ -1351,10 +1366,34 @@
   document.getElementById('auth-google-register').addEventListener('click', () => signInWithGoogle(registerMessage));
 
   if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       const isGoogleUser = session?.user?.app_metadata?.provider === 'google';
       const hasSystemPassword = session?.user?.id && localStorage.getItem(`nai-password-ready-${session.user.id}`) === 'true';
-      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && !hasSystemPassword && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) showAuthView('password');
+      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) {
+        try {
+          const verified = await isCustomEmailVerified(session.user.email);
+          const requestKey = `nai-google-verification-requested:${session.user.email}`;
+          if (!verified) {
+            if (!sessionStorage.getItem(requestKey)) {
+              await requestCustomVerification(session.user.email);
+              sessionStorage.setItem(requestKey, 'true');
+            }
+            setPendingVerification(session.user.email, null, hasSystemPassword ? 'dashboard' : 'password');
+            document.getElementById('verification-email').textContent = session.user.email;
+            verificationMessage.textContent = 'A verification code was sent to your Google account email.';
+            showAuthView('verification');
+          } else if (!hasSystemPassword) {
+            showAuthView('password');
+          } else {
+            showDashboard();
+          }
+        } catch (error) {
+          setPendingVerification(session.user.email, null, hasSystemPassword ? 'dashboard' : 'password');
+          document.getElementById('verification-email').textContent = session.user.email;
+          verificationMessage.textContent = error.message || 'Could not send the verification email.';
+          showAuthView('verification');
+        }
+      }
       else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
       else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
       else if (_event === 'INITIAL_SESSION') showAuthView('welcome');
