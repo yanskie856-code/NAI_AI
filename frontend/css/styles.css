@@ -4,6 +4,40 @@ body {
   overflow-x: hidden;
 }
 
+.nai-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(12, 41, 57, 0.92), rgba(3, 1, 8, 0.99) 48%);
+  transition: opacity 520ms ease, visibility 0s linear 520ms;
+}
+
+.nai-preloader::before {
+  position: absolute;
+  inset: -50%;
+  background: repeating-linear-gradient(115deg, transparent 0 88px, rgba(103, 232, 249, 0.045) 89px 90px), radial-gradient(circle at center, transparent 0 15%, rgba(34, 211, 238, 0.06) 15.1% 15.2%, transparent 15.3% 28%, rgba(244, 114, 182, 0.04) 28.1% 28.2%, transparent 28.3%);
+  content: '';
+  animation: preloader-scan 18s linear infinite;
+}
+
+.preloader-complete { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo { position: relative; z-index: 1; display: grid; place-items: center; width: 6.5rem; height: 6.5rem; border: 1px solid rgba(244, 114, 182, 0.75); border-radius: 34% 66% 58% 42%; background: linear-gradient(145deg, #22d3ee, #7e22ce 56%, #f43f5e); box-shadow: 0 0 28px rgba(244, 114, 182, 0.55), 0 0 80px rgba(34, 211, 238, 0.2), inset 0 0 24px rgba(255, 255, 255, 0.18); color: white; font-size: 4rem; font-weight: 700; transform: rotate(-8deg); animation: preloader-logo-breathe 2.4s ease-in-out infinite; }
+.preloader-logo::before { position: absolute; inset: 0.45rem; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: inherit; content: ''; animation: preloader-inner-spin 6s linear infinite; }
+.preloader-logo i { position: absolute; right: 15%; bottom: 12%; width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #67e8f9; box-shadow: 0 0 16px #67e8f9; animation: preloader-status-pulse 1.6s ease-out infinite; }
+.preloader-orbit { position: absolute; z-index: 1; width: 11rem; height: 4rem; border: 1px solid rgba(103, 232, 249, 0.24); border-radius: 50%; transform: rotate(-28deg); animation: preloader-orbit 4s linear infinite; }
+.preloader-orbit-two { width: 13rem; height: 5rem; border-color: rgba(244, 114, 182, 0.2); transform: rotate(52deg); animation-duration: 6s; animation-direction: reverse; }
+.preloader-status { position: absolute; z-index: 1; top: calc(50% + 6rem); display: flex; align-items: center; gap: 0.45rem; color: rgba(207, 250, 254, 0.66); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.preloader-status-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); animation: preloader-status-pulse 1.8s ease-out infinite; }
+
+@keyframes preloader-scan { to { transform: translate3d(80px, -60px, 0) rotate(4deg); } }
+@keyframes preloader-logo-breathe { 50% { transform: rotate(4deg) scale(1.045); box-shadow: 0 0 38px rgba(244, 114, 182, 0.68), 0 0 100px rgba(34, 211, 238, 0.28), inset 0 0 24px rgba(255, 255, 255, 0.22); } }
+@keyframes preloader-inner-spin { to { transform: rotate(360deg); } }
+@keyframes preloader-orbit { to { transform: rotate(332deg) scale(1.06); } }
+@keyframes preloader-status-pulse { 70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+
 .auth-screen {
   background: radial-gradient(circle at 50% 18%, rgba(8, 145, 178, 0.2), transparent 38%), rgba(3, 1, 8, 0.96);
   overflow-y: auto;
@@ -352,6 +386,27 @@ body {
 
 .dashboard-content {
   grid-column: span 2;
+  position: relative;
+}
+
+.dashboard-content.is-refreshing,
+.admin-content.is-refreshing {
+  opacity: 0.55;
+  transition: opacity 180ms ease;
+}
+
+.dashboard-content.is-refreshing::after,
+.admin-content.is-refreshing::after {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(103, 232, 249, 0.2);
+  border-top-color: #67e8f9;
+  border-radius: 50%;
+  content: '';
+  animation: content-refresh-spin 650ms linear infinite;
 }
 
 .dashboard-metric {
@@ -554,6 +609,7 @@ body {
 @keyframes user-grid-drift { to { transform: translate3d(-75px, 55px, 0); } }
 @keyframes user-atmosphere { from { transform: scale(0.97); opacity: 0.6; } to { transform: scale(1.05); opacity: 1; } }
 @keyframes user-status-pulse { 70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
+@keyframes content-refresh-spin { to { transform: rotate(360deg); } }
 
 .admin-panel {
   animation: admin-panel-in 180ms ease-out;
@@ -586,6 +642,7 @@ body {
 
 .admin-content {
   min-width: 0;
+  position: relative;
 }
 
 .admin-section {

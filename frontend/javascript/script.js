@@ -973,9 +973,14 @@
   }
 
   async function renderRequests() {
+    const content = document.querySelector('.dashboard-content');
+    content?.classList.add('is-refreshing');
     if (supabaseClient) {
       const user = await getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        content?.classList.remove('is-refreshing');
+        return;
+      }
       const { data, error } = await supabaseClient
         .from('system_requests')
         .select('id, system_name, message, status, embed_token_id, embed_link, knowledge_file_name')
@@ -986,6 +991,7 @@
         requestList.innerHTML = data.length
           ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a>` : ''}</article>`).join('')
           : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+        content?.classList.remove('is-refreshing');
         return;
       }
     }
@@ -994,21 +1000,26 @@
     requestList.innerHTML = requests.length
       ? requests.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.embedLink ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embedLink)}">Open connected NAI</a>` : ''}</article>`).join('')
       : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+    content?.classList.remove('is-refreshing');
   }
 
   async function renderAdminRequests() {
     if (!supabaseClient || !adminRequestList) return;
+    const content = document.querySelector('.admin-content');
+    content?.classList.add('is-refreshing');
     const { data, error } = await supabaseClient
       .from('system_requests')
       .select('id, email, system_name, message, knowledge_content, knowledge_file_name, status, embed_token_id, created_at')
       .order('created_at', { ascending: false });
     if (error) {
       adminRequestList.innerHTML = `<p class="text-xs text-rose-200">${escapeHtml(error.message)}</p>`;
+      content?.classList.remove('is-refreshing');
       return;
     }
     adminRequestList.innerHTML = data.length
       ? data.map(request => `<article class="admin-request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-white">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-1 text-xs text-purple-200/55">For ${escapeHtml(request.email)}</p><p class="mt-2 text-xs text-purple-100/70">${escapeHtml(request.message)}</p>${request.knowledge_content ? `<pre class="mt-2">${escapeHtml(request.knowledge_content)}</pre>` : ''}${request.knowledge_file_name ? `<p class="mt-2 text-xs text-purple-200/50">Attached: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.status === 'pending' ? `<div class="admin-request-actions"><button type="button" class="admin-copy admin-approve" data-approve-request="${request.id}">Approve & send link</button><button type="button" class="admin-copy admin-reject" data-reject-request="${request.id}">Reject</button></div>` : request.embed_token_id ? '<p class="mt-2 text-xs text-emerald-200">Secure link created for requester.</p>' : ''}</article>`).join('')
       : '<p class="text-xs text-purple-100/50">No requests yet.</p>';
+    content?.classList.remove('is-refreshing');
   }
 
   async function updateAuthStatus() {
@@ -1042,9 +1053,12 @@
   }
 
   function showDashboardView(viewId) {
+    const content = document.querySelector('.dashboard-content');
+    content?.classList.add('is-refreshing');
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.toggle('hidden', view.id !== viewId));
     document.querySelectorAll('.dashboard-nav').forEach(button => button.classList.toggle('dashboard-nav-active', button.dataset.dashboardView === viewId));
     if (viewId === 'dashboard-access-view') renderRequests();
+    setTimeout(() => content?.classList.remove('is-refreshing'), 220);
   }
 
   document.getElementById('welcome-login').addEventListener('click', () => showAuthView('login'));
@@ -1346,12 +1360,15 @@
   }
 
   function showAdminView(viewId) {
+    const content = document.querySelector('.admin-content');
+    content?.classList.add('is-refreshing');
     document.querySelectorAll('.admin-view').forEach(view => view.classList.toggle('hidden', view.id !== viewId));
     document.querySelectorAll('.admin-nav').forEach(button => button.classList.toggle('admin-nav-active', button.dataset.adminView === viewId));
     if (viewId === 'admin-overview-view') {
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
       renderAdminRequests();
     }
+    setTimeout(() => content?.classList.remove('is-refreshing'), 220);
   }
 
   function copyText(input) {

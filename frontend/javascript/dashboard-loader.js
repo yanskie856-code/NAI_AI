@@ -15,6 +15,8 @@ try {
     loadDashboardFragment('dashboard/admin.html', 'admin-portal')
   ]);
   await import('./script.js');
+  document.getElementById('nai-preloader')?.classList.add('preloader-complete');
 } catch (error) {
   console.error('Dashboard fragments could not be loaded.', error);
+  document.getElementById('nai-preloader')?.classList.add('preloader-complete');
 }
