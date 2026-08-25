@@ -954,6 +954,7 @@
   let pendingAdminLogin = false;
   let pendingVerification = null;
   let pendingSignup = false;
+  let logoutTransitionActive = false;
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -1047,6 +1048,22 @@
   function hideLogoutLoader() {
     naiPreloader?.classList.remove('preloader-logging-out');
     naiPreloader?.classList.add('preloader-complete');
+  }
+
+  async function completeLogout(targetView, message) {
+    if (logoutTransitionActive) return;
+    logoutTransitionActive = true;
+    showLogoutLoader(message);
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    localStorage.removeItem('nai-demo-user');
+    localStorage.removeItem('nai-demo-admin');
+    await new Promise(resolve => setTimeout(resolve, 520));
+    adminPortal.classList.add('hidden');
+    userDashboard.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    showAuthView(targetView);
+    hideLogoutLoader();
+    logoutTransitionActive = false;
   }
 
   function showAuthScreen() {
@@ -1214,16 +1231,8 @@
   document.getElementById('admin-sign-out').addEventListener('click', async () => {
     const adminSignOut = document.getElementById('admin-sign-out');
     adminSignOut.classList.add('is-signing-out');
-    showLogoutLoader('Closing admin session');
-    if (supabaseClient) await supabaseClient.auth.signOut();
-    localStorage.removeItem('nai-demo-admin');
-    setTimeout(() => {
-      adminPortal.classList.add('hidden');
-      authScreen.classList.remove('hidden');
-      showAuthView('admin');
-      adminSignOut.classList.remove('is-signing-out');
-      hideLogoutLoader();
-    }, 520);
+    await completeLogout('admin', 'Closing admin session');
+    adminSignOut.classList.remove('is-signing-out');
   });
   async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
@@ -1248,7 +1257,7 @@
       else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
       else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
       else if (_event === 'INITIAL_SESSION') showAuthView('welcome');
-      else if (_event === 'SIGNED_OUT') showAuthScreen();
+      else if (_event === 'SIGNED_OUT' && !logoutTransitionActive) showAuthScreen();
     });
   } else if (getDemoUser()) {
     showDashboard();
@@ -1258,15 +1267,8 @@
 
   signOutButton.addEventListener('click', async () => {
     signOutButton.classList.add('is-signing-out');
-    showLogoutLoader('Signing out securely');
-    if (supabaseClient) await supabaseClient.auth.signOut();
-    localStorage.removeItem('nai-demo-user');
-    localStorage.removeItem('nai-demo-admin');
-    setTimeout(() => {
-      signOutButton.classList.remove('is-signing-out');
-      showAuthScreen();
-      hideLogoutLoader();
-    }, 650);
+    await completeLogout('login', 'Signing out securely');
+    signOutButton.classList.remove('is-signing-out');
   });
 
   document.querySelector('.auth-forgot').addEventListener('click', async () => {
