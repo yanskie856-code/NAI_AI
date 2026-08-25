@@ -952,9 +952,19 @@
   const naiPreloader = document.getElementById('nai-preloader');
   const preloaderStatus = naiPreloader?.querySelector('.preloader-status');
   let pendingAdminLogin = false;
-  let pendingVerification = null;
+  let pendingVerification = JSON.parse(sessionStorage.getItem('nai-pending-verification') || 'null');
   let pendingSignup = false;
   let logoutTransitionActive = false;
+
+  function setPendingVerification(email, password = null) {
+    pendingVerification = { email, ...(password ? { password } : {}) };
+    sessionStorage.setItem('nai-pending-verification', JSON.stringify({ email }));
+  }
+
+  function clearPendingVerification() {
+    pendingVerification = null;
+    sessionStorage.removeItem('nai-pending-verification');
+  }
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -1121,7 +1131,19 @@
         : await supabaseClient.auth.signInWithPassword({ email, password });
       if (result.error) {
         pendingSignup = false;
-        const message = result.error.message.toLowerCase().includes('confirmation email')
+        const errorMessage = result.error.message.toLowerCase();
+        if (!register && (errorMessage.includes('email not confirmed') || errorMessage.includes('email not verified'))) {
+          setPendingVerification(email, password);
+          document.getElementById('verification-email').textContent = email;
+          verificationMessage.textContent = 'Verify your email before logging in. A new code can be sent below.';
+          showAuthView('verification');
+          if (registerButton) {
+            registerButton.disabled = false;
+            if (registerLabel) registerLabel.textContent = 'Create account';
+          }
+          return;
+        }
+        const message = errorMessage.includes('confirmation email')
           ? 'Account creation is blocked because Supabase could not send the confirmation email. Check SMTP settings, sender email, and active Resend API key.'
           : result.error.message;
         (register ? registerMessage : authMessage).textContent = message;
@@ -1132,9 +1154,9 @@
         return;
       }
       if (register && (!result.data.session || !result.data.user?.email_confirmed_at)) {
-        pendingVerification = { email, password };
+        setPendingVerification(email, password);
         document.getElementById('verification-email').textContent = email;
-        verificationMessage.textContent = 'A six-digit verification code was sent to your email.';
+        verificationMessage.textContent = 'A verification email was sent. Enter its code or click its confirmation link.';
         if (result.data.session) await supabaseClient.auth.signOut();
         pendingSignup = false;
         showAuthView('verification');
@@ -1174,14 +1196,14 @@
       submitButton.textContent = 'Verify and continue';
       return;
     }
-    pendingVerification = null;
+    clearPendingVerification();
     showDashboard();
   });
   document.getElementById('resend-verification').addEventListener('click', async () => {
     if (!pendingVerification) return;
-    const { error } = await supabaseClient.auth.signUp({
+    const { error } = await supabaseClient.auth.resend({
+      type: 'signup',
       email: pendingVerification.email,
-      password: pendingVerification.password,
       options: {
         emailRedirectTo: supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`
       }
