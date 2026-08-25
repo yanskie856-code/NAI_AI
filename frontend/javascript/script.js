@@ -949,6 +949,8 @@
   const emailVerificationCard = document.getElementById('email-verification-card');
   const verificationMessage = document.getElementById('verification-message');
   const signOutButton = document.getElementById('sign-out');
+  const naiPreloader = document.getElementById('nai-preloader');
+  const preloaderStatus = naiPreloader?.querySelector('.preloader-status');
   let pendingAdminLogin = false;
   let pendingVerification = null;
   let pendingSignup = false;
@@ -1033,6 +1035,18 @@
     userDashboard.classList.remove('hidden');
     renderRequests();
     updateAuthStatus();
+  }
+
+  function showLogoutLoader(message) {
+    if (!naiPreloader) return;
+    if (preloaderStatus) preloaderStatus.lastChild.textContent = message;
+    naiPreloader.classList.remove('preloader-complete');
+    naiPreloader.classList.add('preloader-logging-out');
+  }
+
+  function hideLogoutLoader() {
+    naiPreloader?.classList.remove('preloader-logging-out');
+    naiPreloader?.classList.add('preloader-complete');
   }
 
   function showAuthScreen() {
@@ -1200,6 +1214,7 @@
   document.getElementById('admin-sign-out').addEventListener('click', async () => {
     const adminSignOut = document.getElementById('admin-sign-out');
     adminSignOut.classList.add('is-signing-out');
+    showLogoutLoader('Closing admin session');
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-admin');
     setTimeout(() => {
@@ -1207,6 +1222,7 @@
       authScreen.classList.remove('hidden');
       showAuthView('admin');
       adminSignOut.classList.remove('is-signing-out');
+      hideLogoutLoader();
     }, 520);
   });
   async function signInWithGoogle(messageElement) {
@@ -1242,12 +1258,14 @@
 
   signOutButton.addEventListener('click', async () => {
     signOutButton.classList.add('is-signing-out');
+    showLogoutLoader('Signing out securely');
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-user');
     localStorage.removeItem('nai-demo-admin');
     setTimeout(() => {
       signOutButton.classList.remove('is-signing-out');
       showAuthScreen();
+      hideLogoutLoader();
     }, 650);
   });
 

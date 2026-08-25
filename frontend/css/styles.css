@@ -24,6 +24,8 @@ body {
 }
 
 .preloader-complete { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logging-out .preloader-logo { animation-duration: 1.25s; }
+.preloader-logging-out .preloader-status { color: rgba(244, 114, 182, 0.78); }
 .preloader-logo { position: relative; z-index: 1; display: grid; place-items: center; width: 6.5rem; height: 6.5rem; border: 1px solid rgba(244, 114, 182, 0.75); border-radius: 34% 66% 58% 42%; background: linear-gradient(145deg, #22d3ee, #7e22ce 56%, #f43f5e); box-shadow: 0 0 28px rgba(244, 114, 182, 0.55), 0 0 80px rgba(34, 211, 238, 0.2), inset 0 0 24px rgba(255, 255, 255, 0.18); color: white; font-size: 4rem; font-weight: 700; transform: rotate(-8deg); animation: preloader-logo-breathe 2.4s ease-in-out infinite; }
 .preloader-logo::before { position: absolute; inset: 0.45rem; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: inherit; content: ''; animation: preloader-inner-spin 6s linear infinite; }
 .preloader-logo i { position: absolute; right: 15%; bottom: 12%; width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #67e8f9; box-shadow: 0 0 16px #67e8f9; animation: preloader-status-pulse 1.6s ease-out infinite; }
