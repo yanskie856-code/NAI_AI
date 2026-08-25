@@ -948,6 +948,9 @@
   const passwordSetupMessage = document.getElementById('password-setup-message');
   const emailVerificationCard = document.getElementById('email-verification-card');
   const verificationMessage = document.getElementById('verification-message');
+  const authAlert = document.getElementById('auth-alert');
+  const authAlertTitle = document.getElementById('auth-alert-title');
+  const authAlertMessage = document.getElementById('auth-alert-message');
   const signOutButton = document.getElementById('sign-out');
   const naiPreloader = document.getElementById('nai-preloader');
   const preloaderStatus = naiPreloader?.querySelector('.preloader-status');
@@ -964,6 +967,16 @@
   function clearPendingVerification() {
     pendingVerification = null;
     sessionStorage.removeItem('nai-pending-verification');
+  }
+
+  function showAuthAlert(title, message) {
+    authAlertTitle.textContent = title;
+    authAlertMessage.textContent = message;
+    authAlert.classList.remove('hidden');
+  }
+
+  function hideAuthAlert() {
+    authAlert.classList.add('hidden');
   }
 
   async function requestCustomVerification(email) {
@@ -1197,6 +1210,9 @@
         const message = errorMessage.includes('confirmation email')
           ? 'Disable Supabase email confirmations. NAI now sends verification emails through Resend.'
           : result.error.message;
+        if (register && (errorMessage.includes('already registered') || errorMessage.includes('already exists') || errorMessage.includes('user already'))) {
+          showAuthAlert('Account already exists', 'This email is already registered. Log in with the existing account or use password recovery.');
+        }
         (register ? registerMessage : authMessage).textContent = message;
         if (register && registerButton) {
           registerButton.disabled = false;
@@ -1232,6 +1248,12 @@
   document.getElementById('register-form').addEventListener('submit', event => {
     event.preventDefault();
     submitAuth('register');
+  });
+  document.getElementById('auth-alert-close').addEventListener('click', hideAuthAlert);
+  document.getElementById('auth-alert-dismiss').addEventListener('click', hideAuthAlert);
+  document.getElementById('auth-alert-login').addEventListener('click', () => {
+    hideAuthAlert();
+    showAuthView('login');
   });
   document.getElementById('email-verification-form').addEventListener('submit', async event => {
     event.preventDefault();

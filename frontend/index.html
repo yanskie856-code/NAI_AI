@@ -105,6 +105,20 @@
     </section>
   </main>
 
+  <div id="auth-alert" class="auth-alert hidden" role="alertdialog" aria-modal="true" aria-labelledby="auth-alert-title" aria-describedby="auth-alert-message">
+    <div class="auth-alert-card">
+      <button id="auth-alert-close" type="button" class="auth-alert-close" aria-label="Close alert">&#10005;</button>
+      <div class="auth-alert-icon" aria-hidden="true">!</div>
+      <p class="auth-kicker">Account notice</p>
+      <h2 id="auth-alert-title">Account already exists</h2>
+      <p id="auth-alert-message" class="auth-card-copy">This email is already registered. Log in to continue.</p>
+      <div class="auth-alert-actions">
+        <button id="auth-alert-login" type="button" class="auth-primary">Go to login</button>
+        <button id="auth-alert-dismiss" type="button" class="auth-switch">Stay here</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FLOATING AI WIDGET CONTAINER -->
   <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
     
