@@ -423,10 +423,14 @@ body {
 }
 
 .nai-brand-mark {
-  position: absolute;
-  inset: 25%;
+  position: fixed;
+  top: 1.35rem;
+  left: 1.5rem;
+  z-index: 70;
   display: grid;
   place-items: center;
+  width: 3.3rem;
+  height: 3.3rem;
   border: 1px solid rgba(244, 114, 182, 0.7);
   border-radius: 34% 66% 58% 42%;
   background: linear-gradient(145deg, rgba(34, 211, 238, 0.9), rgba(126, 34, 206, 0.9) 55%, rgba(244, 63, 94, 0.8));
@@ -458,6 +462,16 @@ body {
 
 @keyframes nai-mark-float {
   50% { transform: rotate(4deg) translateY(-4px) scale(1.03); }
+}
+
+@media (max-width: 640px) {
+  .nai-brand-mark {
+    top: 1rem;
+    left: 1rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 1.65rem;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {
