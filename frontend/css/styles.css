@@ -4,6 +4,37 @@ body {
   overflow-x: hidden;
 }
 
+body.embed-mode {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+body.embed-mode > #nai-preloader,
+body.embed-mode > .nai-brand-mark,
+body.embed-mode > #auth-screen,
+body.embed-mode > #user-dashboard,
+body.embed-mode > #admin-portal {
+  display: none !important;
+}
+
+body.embed-mode > .fixed.bottom-6.right-6 {
+  inset: auto 1rem 1rem auto;
+  width: 420px;
+  height: 620px;
+}
+
+body.embed-mode.embed-position-bottom-left > .fixed.bottom-6.right-6 { right: auto; left: 1rem; }
+body.embed-mode.embed-position-top-right > .fixed.bottom-6.right-6 { top: 1rem; bottom: auto; }
+body.embed-mode.embed-position-top-left > .fixed.bottom-6.right-6 { top: 1rem; right: auto; bottom: auto; left: 1rem; }
+body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { display: none; }
+
+#knowledge-dropzone.is-dragging {
+  border-color: #67e8f9;
+  background: rgba(8, 145, 178, 0.18);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.14);
+}
+
 .nai-preloader {
   position: fixed;
   inset: 0;

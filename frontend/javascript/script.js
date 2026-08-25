@@ -929,6 +929,9 @@
   const embedLink = document.getElementById('embed-link');
   const embedCode = document.getElementById('embed-code');
   const requesterEmail = document.getElementById('requester-email');
+  const knowledgeDropzone = document.getElementById('knowledge-dropzone');
+  const embedPosition = document.getElementById('embed-position');
+  const embedMode = document.getElementById('embed-mode');
   const userDashboard = document.getElementById('user-dashboard');
   const authStatus = document.getElementById('auth-status');
   const requestForm = document.getElementById('system-request-form');
@@ -1649,6 +1652,10 @@
   knowledgeFile.addEventListener('change', async () => {
     const file = knowledgeFile.files[0];
     if (!file) return;
+    await loadKnowledgeFile(file);
+  });
+
+  async function loadKnowledgeFile(file) {
     if (file.size > 5 * 1024 * 1024) {
       knowledgeStatus.textContent = 'File is larger than 5 MB.';
       return;
@@ -1664,15 +1671,36 @@
     } catch (error) {
       knowledgeStatus.textContent = 'Could not read this file.';
     }
+  }
+
+  knowledgeDropzone?.addEventListener('dragover', event => {
+    event.preventDefault();
+    knowledgeDropzone.classList.add('is-dragging');
+  });
+  knowledgeDropzone?.addEventListener('dragleave', () => knowledgeDropzone.classList.remove('is-dragging'));
+  knowledgeDropzone?.addEventListener('drop', async event => {
+    event.preventDefault();
+    knowledgeDropzone.classList.remove('is-dragging');
+    const file = [...event.dataTransfer.files].find(item => /\.(txt|docx)$/i.test(item.name));
+    if (file) await loadKnowledgeFile(file);
+    else knowledgeStatus.textContent = 'Choose a TXT or DOCX guide.';
   });
 
   document.getElementById('generate-link').addEventListener('click', () => {
     const name = systemName.value.trim() || 'My Connected System';
     configureNAI({ name });
     const token = createEmbedToken();
-    const url = `${window.location.origin}${window.location.pathname}#nai-token=${token}`;
+    const position = embedPosition?.value || 'bottom-right';
+    const mode = embedMode?.value || 'mascot';
+    const url = `${window.location.origin}${window.location.pathname}?embed=1&position=${position}&mode=${mode}#nai-token=${token}`;
+    const positionStyle = {
+      'bottom-right': 'right:16px;bottom:16px',
+      'bottom-left': 'left:16px;bottom:16px',
+      'top-right': 'right:16px;top:16px',
+      'top-left': 'left:16px;top:16px'
+    }[position] || 'right:16px;bottom:16px';
     embedLink.value = url;
-    embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" frameborder="0"></iframe>`;
+    embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" style="position:fixed;${positionStyle};border:0;background:transparent" allow="clipboard-write"></iframe>`;
     localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
   });
 
@@ -1747,4 +1775,10 @@
     window.addEventListener('DOMContentLoaded', initMascotDetailed, { once: true });
   } else {
     initMascotDetailed();
+  }
+
+  const embedParams = new URLSearchParams(window.location.search);
+  if (embedParams.has('embed')) {
+    document.body.classList.add(`embed-position-${embedParams.get('position') || 'bottom-right'}`);
+    document.body.classList.add(`embed-${embedParams.get('mode') || 'mascot'}`);
   }
