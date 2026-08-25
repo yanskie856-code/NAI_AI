@@ -1155,20 +1155,6 @@
       registerButton.disabled = true;
       if (registerLabel) registerLabel.textContent = 'Creating account...';
     }
-    if (register) {
-      try {
-        await requestCustomVerification(email);
-        setPendingVerification(email, password);
-      } catch (error) {
-        pendingSignup = false;
-        registerMessage.textContent = error.message;
-        if (registerButton) {
-          registerButton.disabled = false;
-          if (registerLabel) registerLabel.textContent = 'Create account';
-        }
-        return;
-      }
-    }
     if (supabaseClient) {
       const result = register
         ? await supabaseClient.auth.signUp({
@@ -1213,6 +1199,25 @@
         if (registerButton) {
           registerButton.disabled = false;
           if (registerLabel) registerLabel.textContent = 'Create account';
+        }
+        return;
+      }
+      if (register) {
+        try {
+          await requestCustomVerification(email);
+          setPendingVerification(email, password, 'login');
+          document.getElementById('verification-email').textContent = email;
+          verificationMessage.textContent = 'A verification email was sent. Enter its code or click its confirmation link.';
+          if (result.data.session) await supabaseClient.auth.signOut();
+          pendingSignup = false;
+          showAuthView('verification');
+        } catch (error) {
+          pendingSignup = false;
+          registerMessage.textContent = error.message;
+          if (registerButton) {
+            registerButton.disabled = false;
+            if (registerLabel) registerLabel.textContent = 'Create account';
+          }
         }
         return;
       }
