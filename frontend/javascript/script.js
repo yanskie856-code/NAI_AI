@@ -1220,6 +1220,15 @@
         }
         return;
       }
+      if (register && result.data.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length === 0) {
+        pendingSignup = false;
+        showAuthAlert('Account already exists', 'This email is already registered. Log in with the existing account or use password recovery.');
+        if (registerButton) {
+          registerButton.disabled = false;
+          if (registerLabel) registerLabel.textContent = 'Create account';
+        }
+        return;
+      }
       if (register && (!result.data.session || !result.data.user?.email_confirmed_at)) {
         setPendingVerification(email, password, 'login');
         document.getElementById('verification-email').textContent = email;
