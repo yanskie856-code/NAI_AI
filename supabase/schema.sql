@@ -99,6 +99,10 @@ create table if not exists public.system_requests (
   updated_at timestamptz not null default now()
 );
 
+alter table public.system_requests add column if not exists knowledge_content text not null default '';
+alter table public.system_requests add column if not exists knowledge_file_name text;
+alter table public.system_requests add column if not exists embed_link text;
+
 alter table public.systems enable row level security;
 alter table public.knowledge_documents enable row level security;
 alter table public.embed_tokens enable row level security;
@@ -108,6 +112,11 @@ drop policy if exists "Owners manage their systems" on public.systems;
 create policy "Owners manage their systems"
   on public.systems for all to authenticated
   using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+
+drop policy if exists "Admins manage requested systems" on public.systems;
+create policy "Admins manage requested systems"
+  on public.systems for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "Owners manage their documents" on public.knowledge_documents;
 create policy "Owners manage their documents"
@@ -122,6 +131,11 @@ create policy "Owners manage their documents"
     )
   );
 
+drop policy if exists "Admins manage requested documents" on public.knowledge_documents;
+create policy "Admins manage requested documents"
+  on public.knowledge_documents for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
 drop policy if exists "Owners manage their tokens" on public.embed_tokens;
 create policy "Owners manage their tokens"
   on public.embed_tokens for all to authenticated
@@ -135,11 +149,26 @@ create policy "Owners manage their tokens"
     )
   );
 
+drop policy if exists "Admins manage requested tokens" on public.embed_tokens;
+create policy "Admins manage requested tokens"
+  on public.embed_tokens for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
 drop policy if exists "Users manage their requests" on public.system_requests;
 create policy "Users manage their requests"
   on public.system_requests for all to authenticated
   using (requester_id = auth.uid())
   with check (requester_id = auth.uid() and email = coalesce(auth.jwt() ->> 'email', email));
+
+drop policy if exists "Admins review requests" on public.system_requests;
+create policy "Admins review requests"
+  on public.system_requests for select to authenticated
+  using (public.is_admin());
+
+drop policy if exists "Admins update requests" on public.system_requests;
+create policy "Admins update requests"
+  on public.system_requests for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
 
 insert into storage.buckets (id, name, public)
 values ('knowledge', 'knowledge', false)

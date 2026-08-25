@@ -539,6 +539,16 @@ body {
   padding: 1rem;
 }
 
+.dashboard-knowledge-upload { display: block; border: 1px dashed rgba(103, 232, 249, 0.28); border-radius: 0.75rem; color: rgba(207, 250, 254, 0.65); padding: 0.75rem; font-size: 0.72rem; }
+.dashboard-knowledge-upload input { display: block; margin-top: 0.5rem; width: 100%; font-size: 0.7rem; }
+.admin-request-inbox { border-top: 1px solid rgba(168, 85, 247, 0.16); padding-top: 1rem; }
+.admin-request-item { border: 1px solid rgba(168, 85, 247, 0.18); border-radius: 0.75rem; background: rgba(15, 7, 32, 0.52); padding: 0.8rem; }
+.admin-request-item pre { max-height: 8rem; overflow: auto; white-space: pre-wrap; color: rgba(233, 213, 255, 0.62); font: inherit; font-size: 0.7rem; }
+.admin-request-actions { display: flex; gap: 0.5rem; margin-top: 0.7rem; }
+.admin-request-actions button { flex: 1; }
+.admin-approve { border-color: rgba(52, 211, 153, 0.35); background: rgba(6, 95, 70, 0.3); color: #a7f3d0; }
+.admin-reject { border-color: rgba(251, 113, 133, 0.3); background: rgba(136, 19, 55, 0.25); color: #fecdd3; }
+
 .dashboard-google {
   border: 1px solid rgba(125, 211, 252, 0.3);
   border-radius: 0.75rem;

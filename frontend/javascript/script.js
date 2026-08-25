@@ -934,6 +934,7 @@
   const requestForm = document.getElementById('system-request-form');
   const requestStatus = document.getElementById('request-status');
   const requestList = document.getElementById('request-list');
+  const adminRequestList = document.getElementById('admin-request-list');
   const supabaseConfig = window.NAI_SUPABASE_CONFIG || {};
   const supabaseClient = supabaseConfig.url && supabaseConfig.anonKey && window.supabase
     ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
@@ -971,12 +972,43 @@
     return getDemoUser();
   }
 
-  function renderRequests() {
+  async function renderRequests() {
+    if (supabaseClient) {
+      const user = await getCurrentUser();
+      if (!user) return;
+      const { data, error } = await supabaseClient
+        .from('system_requests')
+        .select('id, system_name, message, status, embed_token_id, embed_link, knowledge_file_name')
+        .eq('requester_id', user.id)
+        .order('created_at', { ascending: false });
+      if (!error) {
+        document.getElementById('overview-request-count').textContent = data.length;
+        requestList.innerHTML = data.length
+          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a>` : ''}</article>`).join('')
+          : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+        return;
+      }
+    }
     const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
     document.getElementById('overview-request-count').textContent = requests.length;
     requestList.innerHTML = requests.length
       ? requests.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.embedLink ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embedLink)}">Open connected NAI</a>` : ''}</article>`).join('')
       : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+  }
+
+  async function renderAdminRequests() {
+    if (!supabaseClient || !adminRequestList) return;
+    const { data, error } = await supabaseClient
+      .from('system_requests')
+      .select('id, email, system_name, message, knowledge_content, knowledge_file_name, status, embed_token_id, created_at')
+      .order('created_at', { ascending: false });
+    if (error) {
+      adminRequestList.innerHTML = `<p class="text-xs text-rose-200">${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    adminRequestList.innerHTML = data.length
+      ? data.map(request => `<article class="admin-request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-white">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-1 text-xs text-purple-200/55">For ${escapeHtml(request.email)}</p><p class="mt-2 text-xs text-purple-100/70">${escapeHtml(request.message)}</p>${request.knowledge_content ? `<pre class="mt-2">${escapeHtml(request.knowledge_content)}</pre>` : ''}${request.knowledge_file_name ? `<p class="mt-2 text-xs text-purple-200/50">Attached: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.status === 'pending' ? `<div class="admin-request-actions"><button type="button" class="admin-copy admin-approve" data-approve-request="${request.id}">Approve & send link</button><button type="button" class="admin-copy admin-reject" data-reject-request="${request.id}">Reject</button></div>` : request.embed_token_id ? '<p class="mt-2 text-xs text-emerald-200">Secure link created for requester.</p>' : ''}</article>`).join('')
+      : '<p class="text-xs text-purple-100/50">No requests yet.</p>';
   }
 
   async function updateAuthStatus() {
@@ -1221,16 +1253,25 @@
       return;
     }
 
+    const requestKnowledgeFile = document.getElementById('request-knowledge-file').files[0];
+    let knowledgeContent = '';
+    if (requestKnowledgeFile) {
+      knowledgeContent = requestKnowledgeFile.name.toLowerCase().endsWith('.docx')
+        ? (await mammoth.extractRawText({ arrayBuffer: await requestKnowledgeFile.arrayBuffer() })).value
+        : await requestKnowledgeFile.text();
+    }
     const request = {
       id: crypto.randomUUID(),
       email: user.email,
       system: document.getElementById('request-system').value.trim(),
       message: document.getElementById('request-message').value.trim(),
+      knowledgeContent,
+      knowledgeFileName: requestKnowledgeFile?.name || null,
       status: 'pending',
       createdAt: new Date().toISOString()
     };
     if (supabaseClient) {
-      const { error } = await supabaseClient.from('system_requests').insert({ requester_id: user.id, email: user.email, system_name: request.system, message: request.message });
+      const { error } = await supabaseClient.from('system_requests').insert({ requester_id: user.id, email: user.email, system_name: request.system, message: request.message, knowledge_content: request.knowledgeContent, knowledge_file_name: request.knowledgeFileName });
       if (error) { requestStatus.textContent = error.message; return; }
     } else {
       const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
@@ -1244,6 +1285,55 @@
   });
 
   document.getElementById('refresh-requests').addEventListener('click', renderRequests);
+  document.getElementById('refresh-admin-requests').addEventListener('click', renderAdminRequests);
+
+  async function createAdminLink(requestId) {
+    const { data: request, error: requestError } = await supabaseClient
+      .from('system_requests').select('id, requester_id, system_name, knowledge_content, knowledge_file_name').eq('id', requestId).single();
+    if (requestError) throw requestError;
+    const { data: system, error: systemError } = await supabaseClient
+      .from('systems').insert({ owner_id: request.requester_id, name: request.system_name }).select('id').single();
+    if (systemError) throw systemError;
+    const rawToken = `${crypto.randomUUID()}-${crypto.randomUUID()}`;
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawToken));
+    const tokenHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    const { data: token, error: tokenError } = await supabaseClient.from('embed_tokens').insert({
+      system_id: system.id, owner_id: request.requester_id, token_hash: tokenHash,
+      expires_at: new Date(Date.now() + 30 * 86400000).toISOString()
+    }).select('id').single();
+    if (tokenError) throw tokenError;
+    if (request.knowledge_content) {
+      const { error: documentError } = await supabaseClient.from('knowledge_documents').insert({
+        system_id: system.id,
+        owner_id: request.requester_id,
+        file_name: request.knowledge_file_name || `${request.system_name}-knowledge.txt`,
+        storage_path: `admin-request/${request.id}/${crypto.randomUUID()}`,
+        content: request.knowledge_content,
+        mime_type: 'text/plain'
+      });
+      if (documentError) throw documentError;
+    }
+    const embedLink = `${window.location.origin}${window.location.pathname}#nai-token=${rawToken}`;
+    const { error: updateError } = await supabaseClient.from('system_requests').update({
+      status: 'approved', embed_token_id: token.id, embed_link: embedLink, updated_at: new Date().toISOString()
+    }).eq('id', requestId);
+    if (updateError) throw updateError;
+    return embedLink;
+  }
+
+  adminRequestList?.addEventListener('click', async event => {
+    const approve = event.target.closest('[data-approve-request]');
+    const reject = event.target.closest('[data-reject-request]');
+    const requestId = approve?.dataset.approveRequest || reject?.dataset.rejectRequest;
+    if (!requestId || !supabaseClient) return;
+    try {
+      if (reject) await supabaseClient.from('system_requests').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', requestId);
+      if (approve) await navigator.clipboard.writeText(await createAdminLink(requestId));
+      await renderAdminRequests();
+    } catch (error) {
+      adminRequestList.insertAdjacentHTML('afterbegin', `<p class="text-xs text-rose-200">${escapeHtml(error.message)}</p>`);
+    }
+  });
 
   function createEmbedToken() {
     const bytes = new Uint8Array(18);
@@ -1256,6 +1346,7 @@
     document.querySelectorAll('.admin-nav').forEach(button => button.classList.toggle('admin-nav-active', button.dataset.adminView === viewId));
     if (viewId === 'admin-overview-view') {
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
+      renderAdminRequests();
     }
   }
 
@@ -1264,17 +1355,35 @@
     navigator.clipboard.writeText(input.value);
   }
 
-  function loadAttachedSystemFromToken() {
+  async function loadAttachedSystemFromToken() {
     const token = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
     if (!token) return;
 
     const saved = localStorage.getItem(`nai-system-${token}`);
-    if (!saved) return;
+    if (saved) {
+      try {
+        const config = JSON.parse(saved);
+        configureNAI({ name: config.name });
+        (config.documents || []).forEach(document => attachDocument(document.fileName, document.text));
+        return;
+      } catch (error) {
+        console.warn('Local NAI system configuration could not be restored.');
+      }
+    }
 
+    if (!supabaseClient) return;
     try {
-      const config = JSON.parse(saved);
-      configureNAI({ name: config.name });
-      (config.documents || []).forEach(document => attachDocument(document.fileName, document.text));
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+      const tokenHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      const { data: tokenRecord } = await supabaseClient.from('embed_tokens').select('system_id').eq('token_hash', tokenHash).single();
+      if (!tokenRecord) return;
+      const [{ data: system }, { data: documents }] = await Promise.all([
+        supabaseClient.from('systems').select('name').eq('id', tokenRecord.system_id).single(),
+        supabaseClient.from('knowledge_documents').select('file_name, content').eq('system_id', tokenRecord.system_id)
+      ]);
+      if (!system) return;
+      configureNAI({ name: system.name });
+      (documents || []).forEach(document => attachDocument(document.file_name, document.content));
     } catch (error) {
       console.warn('NAI system configuration could not be restored.');
     }
