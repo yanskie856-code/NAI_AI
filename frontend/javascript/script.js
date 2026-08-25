@@ -1104,6 +1104,7 @@
     passwordSetupMessage.textContent = '';
     clearPendingVerification();
     Object.keys(sessionStorage).filter(key => key.startsWith('nai-google-verification-requested:')).forEach(key => sessionStorage.removeItem(key));
+    Object.keys(sessionStorage).filter(key => key.startsWith('nai-custom-verified:')).forEach(key => sessionStorage.removeItem(key));
     localStorage.removeItem('nai-demo-user');
     localStorage.removeItem('nai-demo-admin');
     await new Promise(resolve => setTimeout(resolve, 520));
@@ -1293,6 +1294,7 @@
     }
     const verifiedEmail = pendingVerification.email;
     const nextView = pendingVerification.nextView || 'login';
+    sessionStorage.setItem(`nai-custom-verified:${verifiedEmail}`, 'true');
     clearPendingVerification();
     if (nextView === 'password') {
       showAuthView('password');
@@ -1414,8 +1416,9 @@
         if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) {
           try {
           const verified = await isCustomEmailVerified(session.user.email);
+          const verifiedThisSession = sessionStorage.getItem(`nai-custom-verified:${session.user.email}`) === 'true';
           const requestKey = `nai-google-verification-requested:${session.user.email}`;
-          if (!verified) {
+          if (!verified && !verifiedThisSession) {
             if (!sessionStorage.getItem(requestKey)) {
               await requestCustomVerification(session.user.email);
               sessionStorage.setItem(requestKey, 'true');
