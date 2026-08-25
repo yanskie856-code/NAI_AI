@@ -1049,10 +1049,8 @@
 
   document.getElementById('welcome-login').addEventListener('click', () => showAuthView('login'));
   document.getElementById('welcome-register').addEventListener('click', () => showAuthView('register'));
-  document.getElementById('welcome-admin').addEventListener('click', () => showAuthView('admin'));
   document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
-  document.getElementById('login-to-admin').addEventListener('click', () => showAuthView('admin'));
   async function submitAuth(mode) {
     const register = mode === 'register';
     const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
@@ -1185,6 +1183,18 @@
     submitAdminAuth();
   });
   document.getElementById('admin-to-login').addEventListener('click', () => showAuthView('login'));
+  document.getElementById('admin-sign-out').addEventListener('click', async () => {
+    const adminSignOut = document.getElementById('admin-sign-out');
+    adminSignOut.classList.add('is-signing-out');
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    localStorage.removeItem('nai-demo-admin');
+    setTimeout(() => {
+      adminPortal.classList.add('hidden');
+      authScreen.classList.remove('hidden');
+      showAuthView('admin');
+      adminSignOut.classList.remove('is-signing-out');
+    }, 520);
+  });
   async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
       const redirectTo = supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`;

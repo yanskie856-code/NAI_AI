@@ -92,18 +92,6 @@ body {
   flex: 1;
 }
 
-.auth-admin-link {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.75rem;
-  z-index: 45;
-  color: rgba(251, 113, 133, 0.7);
-  font-size: 0.7rem;
-  transition: color 180ms ease, transform 180ms ease;
-}
-
-.auth-admin-link:hover { color: #fda4af; transform: translateX(3px); }
-
 .auth-form-card {
   position: absolute;
   top: 50%;
@@ -175,16 +163,6 @@ body {
 .auth-switch strong {
   color: #67e8f9;
 }
-
-.auth-admin-switch {
-  display: block;
-  margin: 0.4rem auto 0;
-  color: rgba(251, 113, 133, 0.72);
-  font-size: 0.7rem;
-  transition: color 180ms ease, transform 180ms ease;
-}
-
-.auth-admin-switch:hover { color: #fda4af; transform: translateX(3px); }
 
 .auth-divider {
   display: flex;
@@ -495,6 +473,60 @@ body {
   background: rgba(3, 1, 8, 0.82);
 }
 
+.admin-portal::before,
+.admin-portal::after {
+  position: fixed;
+  inset: -25%;
+  pointer-events: none;
+  content: '';
+}
+
+.admin-portal::before {
+  background: repeating-linear-gradient(125deg, transparent 0 100px, rgba(244, 114, 182, 0.035) 101px 102px), repeating-linear-gradient(35deg, transparent 0 140px, rgba(168, 85, 247, 0.04) 141px 142px);
+  animation: admin-grid-drift 28s linear infinite;
+}
+
+.admin-portal::after {
+  background: radial-gradient(circle at 85% 12%, rgba(244, 63, 94, 0.11), transparent 21%), radial-gradient(circle at 12% 88%, rgba(126, 34, 206, 0.12), transparent 24%);
+  animation: admin-atmosphere 9s ease-in-out infinite alternate;
+}
+
+.admin-header,
+.admin-layout {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-sign-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  border-radius: 999px;
+  background: rgba(136, 19, 55, 0.2);
+  color: rgba(254, 205, 211, 0.78);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.7rem;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.admin-sign-out:hover { border-color: rgba(251, 113, 133, 0.75); background: rgba(159, 18, 57, 0.35); color: white; transform: translateY(-1px); }
+.admin-sign-out-dot { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #fb7185; box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.5); animation: admin-status-pulse 1.8s ease-out infinite; }
+.admin-sign-out-arrow { transition: transform 180ms ease; }
+.admin-sign-out:hover .admin-sign-out-arrow { transform: translateX(3px); }
+.admin-sign-out.is-signing-out { pointer-events: none; animation: admin-logout-exit 520ms ease both; }
+
+@keyframes admin-grid-drift { to { transform: translate3d(85px, -65px, 0); } }
+@keyframes admin-atmosphere { from { transform: scale(0.96); opacity: 0.6; } to { transform: scale(1.05); opacity: 1; } }
+@keyframes admin-status-pulse { 70% { box-shadow: 0 0 0 7px rgba(251, 113, 133, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); } }
+@keyframes admin-logout-exit { 50% { transform: translateX(7px); opacity: 0.45; } }
+
 .admin-panel {
   animation: admin-panel-in 180ms ease-out;
 }
@@ -672,11 +704,6 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     transform: none;
-  }
-
-  .auth-admin-link {
-    right: 1rem;
-    bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   .auth-action-bar button {
