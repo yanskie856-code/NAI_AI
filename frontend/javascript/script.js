@@ -1494,4 +1494,8 @@
     }, 900);
   });
 
-  window.addEventListener('DOMContentLoaded', initMascotDetailed);
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initMascotDetailed, { once: true });
+  } else {
+    initMascotDetailed();
+  }

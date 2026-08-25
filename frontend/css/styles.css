@@ -422,6 +422,44 @@ body {
   filter: drop-shadow(0 15px 25px rgba(192, 132, 252, 0.45));
 }
 
+.nai-brand-mark {
+  position: absolute;
+  inset: 25%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(244, 114, 182, 0.7);
+  border-radius: 34% 66% 58% 42%;
+  background: linear-gradient(145deg, rgba(34, 211, 238, 0.9), rgba(126, 34, 206, 0.9) 55%, rgba(244, 63, 94, 0.8));
+  box-shadow: 0 0 22px rgba(244, 114, 182, 0.55), inset 0 0 18px rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  opacity: 0.95;
+  transform: rotate(-8deg);
+  animation: nai-mark-float 3s ease-in-out infinite;
+}
+
+.nai-brand-mark::after {
+  position: absolute;
+  right: 16%;
+  bottom: 10%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #67e8f9;
+  box-shadow: 0 0 10px #67e8f9;
+  content: '';
+}
+
+#hd-mascot-canvas canvas {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes nai-mark-float {
+  50% { transform: rotate(4deg) translateY(-4px) scale(1.03); }
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
