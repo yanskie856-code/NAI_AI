@@ -14,6 +14,8 @@ where email = 'admin@example.com';
 
 New Supabase Auth accounts are added to `public.profiles` automatically with the `user` role.
 
+For six-digit signup verification codes, set the Supabase **Authentication -> Email Templates -> Confirm signup** body to include `{{ .Token }}`. The browser verifies that code with Supabase Auth before opening the user dashboard.
+
 To create the admin account, create a user in **Authentication -> Users -> Add user** with the admin email and password `admin1234`, then run the promotion query above. Do not place this password in frontend code or SQL; change it after the first login.
 4. Deploy both Edge Functions:
 

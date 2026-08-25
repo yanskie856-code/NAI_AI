@@ -208,6 +208,7 @@ body {
   left: 50%;
   width: min(28rem, calc(100% - 2rem));
   transform: translate(-50%, -50%);
+  text-align: center;
   border-color: rgba(244, 114, 182, 0.28);
   background: linear-gradient(145deg, rgba(25, 8, 23, 0.98), rgba(8, 8, 18, 0.97));
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 55px rgba(244, 63, 94, 0.14);
@@ -240,6 +241,28 @@ body {
 }
 
 .password-setup-submit:disabled { cursor: wait; filter: saturate(0.7); }
+
+.email-verification-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(28rem, calc(100% - 2rem));
+  transform: translate(-50%, -50%);
+  border-color: rgba(103, 232, 249, 0.28);
+  background: linear-gradient(145deg, rgba(7, 22, 31, 0.98), rgba(5, 10, 19, 0.97));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 55px rgba(34, 211, 238, 0.13);
+  text-align: center;
+  animation: password-setup-in 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.verification-code-input {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+}
+
+.verification-submit:disabled { cursor: wait; filter: saturate(0.7); }
 
 .admin-login-mark { display: flex; gap: 0.3rem; margin: 0 auto 1rem; width: fit-content; }
 .admin-login-mark span { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #fb7185; box-shadow: 0 0 12px rgba(251, 113, 133, 0.8); animation: admin-mark-pulse 1.4s ease-in-out infinite; }
@@ -578,6 +601,14 @@ body {
   }
 
   .password-setup-card {
+    top: 1rem;
+    bottom: 1rem;
+    max-height: calc(100svh - 2rem);
+    overflow-y: auto;
+    transform: translateX(-50%);
+  }
+
+  .email-verification-card {
     top: 1rem;
     bottom: 1rem;
     max-height: calc(100svh - 2rem);

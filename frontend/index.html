@@ -69,6 +69,19 @@
       <p id="password-setup-message" class="mt-4 min-h-5 text-center text-xs text-cyan-100/65" aria-live="polite"></p>
     </section>
 
+    <section id="email-verification-card" class="auth-card email-verification-card hidden pointer-events-auto">
+      <div class="password-setup-mark" aria-hidden="true">&#9993;</div>
+      <p class="auth-kicker">Check your inbox</p>
+      <h2>Verify your email</h2>
+      <p class="auth-card-copy">Enter the six-digit code sent to <strong id="verification-email"></strong> to activate your account.</p>
+      <form id="email-verification-form" class="space-y-3">
+        <label class="auth-field">Verification code<input id="verification-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" placeholder="000000" class="admin-input verification-code-input" /></label>
+        <button type="submit" class="auth-primary verification-submit">Verify and continue</button>
+      </form>
+      <button id="resend-verification" type="button" class="auth-switch">Resend code</button>
+      <p id="verification-message" class="mt-4 min-h-5 text-center text-xs text-cyan-100/65" aria-live="polite"></p>
+    </section>
+
     <section id="register-card" class="auth-card auth-form-card hidden pointer-events-auto">
       <p class="auth-kicker">Start with NAI</p>
       <h2>Create your account</h2>

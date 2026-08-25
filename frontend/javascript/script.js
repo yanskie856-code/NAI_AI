@@ -945,8 +945,11 @@
   const adminAuthMessage = document.getElementById('admin-auth-message');
   const passwordSetupCard = document.getElementById('password-setup-card');
   const passwordSetupMessage = document.getElementById('password-setup-message');
+  const emailVerificationCard = document.getElementById('email-verification-card');
+  const verificationMessage = document.getElementById('verification-message');
   const signOutButton = document.getElementById('sign-out');
   let pendingAdminLogin = false;
+  let pendingVerification = null;
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -1001,6 +1004,7 @@
     document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
     adminLoginCard.classList.toggle('hidden', view !== 'admin');
     passwordSetupCard.classList.toggle('hidden', view !== 'password');
+    emailVerificationCard.classList.toggle('hidden', view !== 'verification');
   }
 
   function showDashboardView(viewId) {
@@ -1025,7 +1029,13 @@
         ? await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } })
         : await supabaseClient.auth.signInWithPassword({ email, password });
       if (result.error) { (register ? registerMessage : authMessage).textContent = result.error.message; return; }
-      if (register && !result.data.session) { registerMessage.textContent = 'Verify your email, then log in.'; return; }
+      if (register && !result.data.session) {
+        pendingVerification = { email, password };
+        document.getElementById('verification-email').textContent = email;
+        verificationMessage.textContent = 'A six-digit verification code was sent to your email.';
+        showAuthView('verification');
+        return;
+      }
     } else {
       localStorage.setItem('nai-demo-user', JSON.stringify({ email, name }));
     }
@@ -1039,6 +1049,31 @@
   document.getElementById('register-form').addEventListener('submit', event => {
     event.preventDefault();
     submitAuth('register');
+  });
+  document.getElementById('email-verification-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!pendingVerification) return;
+    const code = document.getElementById('verification-code').value.trim();
+    const submitButton = document.querySelector('.verification-submit');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Verifying...';
+    const { error } = await supabaseClient.auth.verifyOtp({ email: pendingVerification.email, token: code, type: 'email' });
+    if (error) {
+      verificationMessage.textContent = error.message;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Verify and continue';
+      return;
+    }
+    pendingVerification = null;
+    showDashboard();
+  });
+  document.getElementById('resend-verification').addEventListener('click', async () => {
+    if (!pendingVerification) return;
+    const { error } = await supabaseClient.auth.signUp({
+      email: pendingVerification.email,
+      password: pendingVerification.password
+    });
+    verificationMessage.textContent = error ? error.message : 'A new verification code was sent.';
   });
   document.getElementById('password-setup-form').addEventListener('submit', async event => {
     event.preventDefault();
@@ -1088,7 +1123,7 @@
         pendingAdminLogin = false;
         authScreen.classList.remove('hidden');
         showAuthView('admin');
-        adminAuthMessage.textContent = 'This account does not have admin access.';
+        adminAuthMessage.textContent = 'Admin access is not enabled for this account. Set its profiles.role to admin in Supabase, then try again.';
         submitButton.disabled = false;
         submitLabel.textContent = 'Enter control room';
         return;
