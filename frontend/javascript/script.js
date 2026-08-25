@@ -950,6 +950,7 @@
   const signOutButton = document.getElementById('sign-out');
   let pendingAdminLogin = false;
   let pendingVerification = null;
+  let pendingSignup = false;
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -1024,19 +1025,28 @@
     const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
     const password = document.getElementById(register ? 'register-password' : 'login-password').value;
     const name = document.getElementById('register-name').value.trim();
+    if (register) pendingSignup = true;
     if (supabaseClient) {
       const result = register
         ? await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } })
         : await supabaseClient.auth.signInWithPassword({ email, password });
-      if (result.error) { (register ? registerMessage : authMessage).textContent = result.error.message; return; }
-      if (register && !result.data.session) {
+      if (result.error) {
+        pendingSignup = false;
+        (register ? registerMessage : authMessage).textContent = result.error.message;
+        return;
+      }
+      if (register && (!result.data.session || !result.data.user?.email_confirmed_at)) {
         pendingVerification = { email, password };
         document.getElementById('verification-email').textContent = email;
         verificationMessage.textContent = 'A six-digit verification code was sent to your email.';
+        if (result.data.session) await supabaseClient.auth.signOut();
+        pendingSignup = false;
         showAuthView('verification');
         return;
       }
+      pendingSignup = false;
     } else {
+      pendingSignup = false;
       localStorage.setItem('nai-demo-user', JSON.stringify({ email, name }));
     }
     showDashboard();
@@ -1057,7 +1067,7 @@
     const submitButton = document.querySelector('.verification-submit');
     submitButton.disabled = true;
     submitButton.textContent = 'Verifying...';
-    const { error } = await supabaseClient.auth.verifyOtp({ email: pendingVerification.email, token: code, type: 'email' });
+    const { error } = await supabaseClient.auth.verifyOtp({ email: pendingVerification.email, token: code, type: 'signup' });
     if (error) {
       verificationMessage.textContent = error.message;
       submitButton.disabled = false;
@@ -1161,8 +1171,9 @@
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       const isGoogleUser = session?.user?.app_metadata?.provider === 'google';
-      if (session && !pendingAdminLogin && isGoogleUser && _event === 'SIGNED_IN') showAuthView('password');
-      else if (session && !pendingAdminLogin) showDashboard();
+      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && _event === 'SIGNED_IN') showAuthView('password');
+      else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
+      else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
       else if (_event === 'SIGNED_OUT') showAuthScreen();
     });
   } else if (getDemoUser()) {
