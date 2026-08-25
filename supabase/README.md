@@ -63,7 +63,7 @@ supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ## 4. Start the backend locally
 
-From the `server` folder:
+From the `backend` folder:
 
 ```sh
 npm install
@@ -71,7 +71,7 @@ copy .env.example .env
 npm start
 ```
 
-Set real Supabase values in `server/.env`. Never commit that file.
+Set real Supabase values in `backend/.env`. Never commit that file.
 
 The backend provides:
 
@@ -132,4 +132,4 @@ window.NAI_SUPABASE_CONFIG = {
 
 Enable Google in **Supabase Dashboard -> Authentication -> Providers -> Google** and add your deployed frontend URL as an allowed redirect URL.
 
-For the Node backend, add `ADMIN_EMAILS=your-google-email@example.com` to `server/.env`. Only those authenticated emails can review requests through the admin routes.
+For the Node backend, add `ADMIN_EMAILS=your-google-email@example.com` to `backend/.env`. Only those authenticated emails can review requests through the admin routes.

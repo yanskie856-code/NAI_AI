@@ -1,0 +1,43 @@
+<div id="user-dashboard" class="admin-portal hidden fixed inset-0 z-[55] overflow-y-auto">
+  <div class="admin-panel min-h-screen w-full bg-[#071018]/95">
+    <div class="flex items-start justify-between gap-4 p-6 border-b border-cyan-300/15">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-cyan-200/70">NAI workspace</p>
+        <h2 class="mt-1 text-2xl font-bold text-white">Your systems</h2>
+        <p id="auth-status" class="mt-2 text-sm text-cyan-100/65">Sign in to request access to a connected system.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="sign-out" type="button" class="sign-out-button hidden"><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Sign out</span></button>
+      </div>
+    </div>
+    <div class="grid gap-6 p-6 lg:grid-cols-[180px_0.9fr_1.1fr]">
+      <aside class="dashboard-sidebar">
+        <p class="mb-3 text-[10px] uppercase tracking-[0.18em] text-cyan-200/50">Workspace</p>
+        <button class="dashboard-nav dashboard-nav-active" type="button" data-dashboard-view="dashboard-overview-view">Overview</button>
+        <button class="dashboard-nav" type="button" id="dashboard-request-nav" data-dashboard-view="dashboard-request-view">Request system</button>
+        <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">Access requests</button>
+      </aside>
+      <div class="dashboard-content">
+        <section id="dashboard-overview-view" class="dashboard-view dashboard-section space-y-4">
+          <h3 class="text-sm font-semibold text-white">Workspace overview</h3>
+          <p class="text-sm leading-relaxed text-cyan-100/65">Request access to a system, send its guide to the admin, and follow the connection status from one workspace.</p>
+          <div class="grid gap-3 sm:grid-cols-2"><div class="dashboard-metric"><span>Requests</span><strong id="overview-request-count">0</strong></div><div class="dashboard-metric"><span>Connection</span><strong>Ready</strong></div></div>
+        </section>
+        <section id="dashboard-request-view" class="dashboard-view hidden space-y-4">
+          <form id="system-request-form" class="dashboard-section space-y-3">
+            <div><h3 class="text-sm font-semibold text-white">Request system access</h3><p class="mt-1 text-xs text-cyan-100/55">Tell the admin which system you need connected.</p></div>
+            <input id="request-system" required type="text" placeholder="System name" class="admin-input" />
+            <textarea id="request-message" required placeholder="What should NAI know about your system?" class="admin-input admin-code"></textarea>
+            <label class="admin-upload dashboard-knowledge-upload">Attach knowledge file (optional)<input id="request-knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /></label>
+            <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/30 hover:from-cyan-500 hover:to-blue-500 transition">Send request</button>
+            <p id="request-status" class="min-h-5 text-xs text-cyan-100/65" aria-live="polite"></p>
+          </form>
+        </section>
+        <section id="dashboard-access-view" class="dashboard-view dashboard-section hidden">
+          <div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-semibold text-white">Access requests</h3><p class="mt-1 text-xs text-cyan-100/55">Track admin decisions and embed links.</p></div><button id="refresh-requests" type="button" class="admin-copy">Refresh</button></div>
+          <div id="request-list" class="mt-4 space-y-3"><p class="text-xs text-cyan-100/50">No requests yet.</p></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

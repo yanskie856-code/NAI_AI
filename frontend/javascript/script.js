@@ -1032,6 +1032,7 @@
   }
 
   function showAuthView(view) {
+    authScreen.classList.add('auth-ready');
     document.getElementById('auth-welcome').classList.toggle('hidden', view !== 'welcome');
     document.getElementById('login-card').classList.toggle('hidden', view !== 'login');
     document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
@@ -1206,10 +1207,13 @@
       if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && _event === 'SIGNED_IN') showAuthView('password');
       else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
       else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
+      else if (_event === 'INITIAL_SESSION') showAuthView('welcome');
       else if (_event === 'SIGNED_OUT') showAuthScreen();
     });
   } else if (getDemoUser()) {
     showDashboard();
+  } else {
+    showAuthView('welcome');
   }
 
   signOutButton.addEventListener('click', async () => {
@@ -1236,13 +1240,6 @@
     } else {
       authMessage.textContent = 'Password reset is available after Supabase is connected.';
     }
-  });
-
-  document.querySelector('[data-dashboard-view="dashboard-overview-view"]').addEventListener('click', () => showDashboardView('dashboard-overview-view'));
-  document.getElementById('dashboard-request-nav').addEventListener('click', () => showDashboardView('dashboard-request-view'));
-  document.getElementById('dashboard-refresh-nav').addEventListener('click', () => {
-    renderRequests();
-    showDashboardView('dashboard-access-view');
   });
 
   requestForm.addEventListener('submit', async event => {
@@ -1283,9 +1280,6 @@
     renderRequests();
     showDashboardView('dashboard-access-view');
   });
-
-  document.getElementById('refresh-requests').addEventListener('click', renderRequests);
-  document.getElementById('refresh-admin-requests').addEventListener('click', renderAdminRequests);
 
   async function createAdminLink(requestId) {
     const { data: request, error: requestError } = await supabaseClient
@@ -1395,10 +1389,6 @@
     adminPortal.classList.add('hidden');
   });
 
-  document.querySelectorAll('.admin-nav').forEach(button => {
-    button.addEventListener('click', () => showAdminView(button.dataset.adminView));
-  });
-
   document.addEventListener('keydown', event => {
     if (event.key.toLowerCase() !== 'q') return;
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
@@ -1439,6 +1429,14 @@
 
   document.getElementById('copy-link').addEventListener('click', () => copyText(embedLink));
   document.getElementById('copy-code').addEventListener('click', () => copyText(embedCode));
+
+  Promise.all([
+    import('./user/dashboard.js'),
+    import('./admin/dashboard.js')
+  ]).then(([userDashboardModule, adminDashboardModule]) => {
+    userDashboardModule.initUserDashboard({ renderRequests, showDashboardView });
+    adminDashboardModule.initAdminDashboard({ renderAdminRequests, showAdminView });
+  });
 
   function toggleChat(open) {
     isChatOpen = open;
