@@ -24,13 +24,19 @@ function emailIsValid(email) {
 
 async function sendVerificationEmail(env, email, code, token) {
   const origin = env.APP_URL || 'https://nai-ai.yanskie856.workers.dev';
-  const response = await fetch('https://api.resend.com/emails', {
+  const isBrevo = Boolean(env.BREVO_API_KEY);
+  const response = await fetch(isBrevo ? 'https://api.brevo.com/v3/smtp/email' : 'https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      ...(isBrevo ? { 'api-key': env.BREVO_API_KEY } : { Authorization: `Bearer ${env.RESEND_API_KEY}` }),
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
+    body: JSON.stringify(isBrevo ? {
+      sender: { email: env.EMAIL_FROM || env.RESEND_FROM_EMAIL || 'onboarding@resend.dev', name: 'NAI Assistant' },
+      to: [{ email }],
+      subject: 'Verify your NAI account',
+      htmlContent: `<p>Use this verification code to activate your NAI account:</p><p style="font-size:28px;font-weight:bold;letter-spacing:6px">${code}</p><p>Or <a href="${origin}/api/auth/verify-email?token=${token}">click here to verify your email</a>.</p><p>This code expires in ${verificationMinutes} minutes.</p>`
+    } : {
       from: env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: [email],
       subject: 'Verify your NAI account',
@@ -44,7 +50,7 @@ async function requestVerification(request, env) {
   const body = await request.json().catch(() => ({}));
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (!emailIsValid(email)) return json({ error: 'A valid email address is required.' }, 400);
-  if (!env.RESEND_API_KEY) return json({ error: 'Email delivery is not configured.' }, 503);
+  if (!env.BREVO_API_KEY && !env.RESEND_API_KEY) return json({ error: 'Email delivery is not configured.' }, 503);
 
   const token = randomHex(32);
   const code = String(Math.floor(100000 + Math.random() * 900000));
