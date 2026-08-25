@@ -1168,19 +1168,6 @@
         }
         return;
       }
-    } else {
-      try {
-        if (!(await isCustomEmailVerified(email))) {
-          setPendingVerification(email, password, 'login');
-          document.getElementById('verification-email').textContent = email;
-          verificationMessage.textContent = 'Verify your email before logging in. A new code can be sent below.';
-          showAuthView('verification');
-          return;
-        }
-      } catch (error) {
-        authMessage.textContent = 'Verification service is unavailable. Please try again.';
-        return;
-      }
     }
     if (supabaseClient) {
       const result = register
@@ -1237,6 +1224,20 @@
         pendingSignup = false;
         showAuthView('verification');
         return;
+      }
+      if (!register && !result.data.user?.email_confirmed_at) {
+        try {
+          if (!(await isCustomEmailVerified(email))) {
+            setPendingVerification(email, password, 'dashboard');
+            document.getElementById('verification-email').textContent = email;
+            verificationMessage.textContent = 'Verify your email before logging in. A new code can be sent below.';
+            showAuthView('verification');
+            return;
+          }
+        } catch (error) {
+          authMessage.textContent = 'Verification service is unavailable. Please try again.';
+          return;
+        }
       }
       pendingSignup = false;
     } else {
