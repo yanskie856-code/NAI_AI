@@ -895,15 +895,21 @@
     }
 
     const lower = userText.toLowerCase();
+    const queryWords = lower.split(/\W+/).filter(word => word.length > 3);
+    let bestParagraph = null;
+    let bestScore = 0;
     for (const document of attachedSystem.documents) {
-      const matchingParagraph = document.text.split(/\n+/).find(paragraph =>
-        lower.split(/\W+/).some(word => word.length > 3 && paragraph.toLowerCase().includes(word))
-      );
-
-      if (matchingParagraph) {
-        return `${attachedSystem.name} guide: ${matchingParagraph.trim()}`;
+      for (const paragraph of document.text.split(/\n+/).map(value => value.trim()).filter(Boolean)) {
+        const paragraphLower = paragraph.toLowerCase();
+        const matchingWords = queryWords.filter(word => paragraphLower.includes(word));
+        const score = matchingWords.length * 4 + (lower.includes(paragraphLower) ? 8 : 0) + (paragraphLower.includes(queryWords.join(' ')) ? 10 : 0);
+        if (score > bestScore) {
+          bestScore = score;
+          bestParagraph = paragraph;
+        }
       }
     }
+    if (bestParagraph) return `${attachedSystem.name} guide: ${bestParagraph}`;
 
     for (const item of attachedSystem.knowledge) {
       if (item.keywords.some(kw => lower.includes(kw))) {
