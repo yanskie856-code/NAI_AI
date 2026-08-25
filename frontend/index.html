@@ -78,7 +78,7 @@
       <div class="password-setup-mark" aria-hidden="true">&#9993;</div>
       <p class="auth-kicker">Check your inbox</p>
       <h2>Verify your email</h2>
-      <p class="auth-card-copy">Enter the six-digit code sent to <strong id="verification-email"></strong> to activate your account.</p>
+      <p class="auth-card-copy">Enter the six-digit code sent to <strong id="verification-email"></strong>, or click the confirmation link in that email.</p>
       <div class="verification-status"><span></span>Secure verification in progress</div>
       <form id="email-verification-form" class="space-y-3">
         <label class="auth-field">Verification code<input id="verification-code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" placeholder="000000" class="admin-input verification-code-input" /></label>
@@ -96,7 +96,7 @@
         <label class="auth-field">Full name<input id="register-name" name="name" type="text" required autocomplete="name" placeholder="Your name" class="admin-input" /></label>
         <label class="auth-field">Email address<input id="register-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" class="admin-input" /></label>
         <label class="auth-field">Password<input id="register-password" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters" class="admin-input" /></label>
-        <button type="submit" class="auth-primary">Create account</button>
+        <button id="register-submit" type="submit" class="auth-primary register-submit"><span>Create account</span><span class="register-submit-arrow" aria-hidden="true">&#8594;</span></button>
       </form>
       <div class="auth-divider"><span></span>or<span></span></div>
       <button id="auth-google-register" type="button" class="auth-google">Continue with Google</button>

@@ -1101,14 +1101,34 @@
     const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
     const password = document.getElementById(register ? 'register-password' : 'login-password').value;
     const name = document.getElementById('register-name').value.trim();
+    const registerButton = document.getElementById('register-submit');
+    const registerLabel = registerButton?.querySelector('span');
     if (register) pendingSignup = true;
+    if (register && registerButton) {
+      registerButton.disabled = true;
+      if (registerLabel) registerLabel.textContent = 'Creating account...';
+    }
     if (supabaseClient) {
       const result = register
-        ? await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } })
+        ? await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`
+          }
+        })
         : await supabaseClient.auth.signInWithPassword({ email, password });
       if (result.error) {
         pendingSignup = false;
-        (register ? registerMessage : authMessage).textContent = result.error.message;
+        const message = result.error.message.toLowerCase().includes('confirmation email')
+          ? 'Account creation is blocked because Supabase could not send the confirmation email. Check SMTP settings, sender email, and active Resend API key.'
+          : result.error.message;
+        (register ? registerMessage : authMessage).textContent = message;
+        if (register && registerButton) {
+          registerButton.disabled = false;
+          if (registerLabel) registerLabel.textContent = 'Create account';
+        }
         return;
       }
       if (register && (!result.data.session || !result.data.user?.email_confirmed_at)) {
@@ -1124,6 +1144,10 @@
     } else {
       pendingSignup = false;
       localStorage.setItem('nai-demo-user', JSON.stringify({ email, name }));
+    }
+    if (register && registerButton) {
+      registerButton.disabled = false;
+      if (registerLabel) registerLabel.textContent = 'Create account';
     }
     showDashboard();
   }
@@ -1157,7 +1181,10 @@
     if (!pendingVerification) return;
     const { error } = await supabaseClient.auth.signUp({
       email: pendingVerification.email,
-      password: pendingVerification.password
+      password: pendingVerification.password,
+      options: {
+        emailRedirectTo: supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`
+      }
     });
     verificationMessage.textContent = error ? error.message : 'A new verification code was sent.';
   });
@@ -1179,6 +1206,8 @@
       submitButton.textContent = 'Save password and continue';
       return;
     }
+    const { data: updatedUser } = await supabaseClient.auth.getUser();
+    if (updatedUser.user) localStorage.setItem(`nai-password-ready-${updatedUser.user.id}`, 'true');
     showDashboard();
   });
   async function submitAdminAuth() {
@@ -1253,7 +1282,8 @@
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
       const isGoogleUser = session?.user?.app_metadata?.provider === 'google';
-      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && _event === 'SIGNED_IN') showAuthView('password');
+      const hasSystemPassword = session?.user?.id && localStorage.getItem(`nai-password-ready-${session.user.id}`) === 'true';
+      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && !hasSystemPassword && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) showAuthView('password');
       else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
       else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
       else if (_event === 'INITIAL_SESSION') showAuthView('welcome');

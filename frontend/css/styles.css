@@ -381,6 +381,11 @@ body {
   filter: brightness(1.15);
 }
 
+.register-submit { display: flex; align-items: center; justify-content: center; gap: 0.65rem; }
+.register-submit:disabled { cursor: wait; filter: saturate(0.7); }
+.register-submit-arrow { transition: transform 180ms ease; }
+.register-submit:hover .register-submit-arrow { transform: translateX(4px); }
+
 .dashboard-sidebar {
   border-right: 1px solid rgba(103, 232, 249, 0.12);
   padding-right: 1rem;
