@@ -1308,12 +1308,23 @@
   });
   document.getElementById('resend-verification').addEventListener('click', async () => {
     if (!pendingVerification) return;
+    const resendButton = document.getElementById('resend-verification');
+    resendButton.disabled = true;
+    resendButton.textContent = 'Sending...';
     try {
       await requestCustomVerification(pendingVerification.email);
-      verificationMessage.textContent = 'A new verification email was sent.';
+      window.location.reload();
     } catch (error) {
       verificationMessage.textContent = error.message;
+      resendButton.disabled = false;
+      resendButton.textContent = 'Resend code';
     }
+  });
+  document.getElementById('verification-back-login').addEventListener('click', () => {
+    const email = pendingVerification?.email || '';
+    clearPendingVerification();
+    document.getElementById('login-email').value = email;
+    showAuthView('login');
   });
   document.getElementById('password-setup-form').addEventListener('submit', async event => {
     event.preventDefault();
@@ -1446,6 +1457,10 @@
         authStateHandling = false;
       }
     });
+  } else if (pendingVerification) {
+    document.getElementById('verification-email').textContent = pendingVerification.email;
+    verificationMessage.textContent = 'Your verification is still pending.';
+    showAuthView('verification');
   } else if (getDemoUser()) {
     showDashboard();
   } else {
