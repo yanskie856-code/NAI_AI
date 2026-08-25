@@ -4,7 +4,18 @@
 
 1. Create a Supabase project.
 2. Open **SQL Editor** and run [`schema.sql`](schema.sql).
-3. Deploy both Edge Functions:
+3. After creating an account, promote it to an admin from **SQL Editor**:
+
+```sql
+update public.profiles
+set role = 'admin', updated_at = now()
+where email = 'admin@example.com';
+```
+
+New Supabase Auth accounts are added to `public.profiles` automatically with the `user` role.
+
+To create the admin account, create a user in **Authentication -> Users -> Add user** with the admin email and password `admin1234`, then run the promotion query above. Do not place this password in frontend code or SQL; change it after the first login.
+4. Deploy both Edge Functions:
 
 ```sh
 supabase functions deploy create-embed-token

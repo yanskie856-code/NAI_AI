@@ -38,6 +38,7 @@
       <div class="auth-divider"><span></span>or<span></span></div>
       <button id="auth-google-login" type="button" class="auth-google">Continue with Google</button>
       <button id="card-to-register" type="button" class="auth-switch">Need an account? <strong>Register</strong></button>
+      <button id="login-to-admin" type="button" class="auth-admin-switch">Admin sign in <span aria-hidden="true">&#8594;</span></button>
       <p id="auth-message" class="mt-4 min-h-5 text-center text-xs text-cyan-100/65" aria-live="polite"></p>
     </section>
 
@@ -53,6 +54,19 @@
       </form>
       <button id="admin-to-login" type="button" class="auth-switch">Back to user login</button>
       <p id="admin-auth-message" class="mt-4 min-h-5 text-center text-xs text-rose-100/70" aria-live="polite"></p>
+    </section>
+
+    <section id="password-setup-card" class="auth-card password-setup-card hidden pointer-events-auto">
+      <div class="password-setup-mark" aria-hidden="true">&#10003;</div>
+      <p class="auth-kicker">One last step</p>
+      <h2>Create your system password</h2>
+      <p class="auth-card-copy">Your Google account is connected. Add a password so you can also sign in directly to NAI.</p>
+      <form id="password-setup-form" class="space-y-3">
+        <label class="auth-field">System password<input id="system-password" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters" class="admin-input" /></label>
+        <label class="auth-field">Confirm password<input id="system-password-confirm" type="password" minlength="8" required autocomplete="new-password" placeholder="Re-enter your password" class="admin-input" /></label>
+        <button type="submit" class="auth-primary password-setup-submit">Save password and continue</button>
+      </form>
+      <p id="password-setup-message" class="mt-4 min-h-5 text-center text-xs text-cyan-100/65" aria-live="polite"></p>
     </section>
 
     <section id="register-card" class="auth-card auth-form-card hidden pointer-events-auto">
@@ -139,7 +153,6 @@
         </div>
         <div class="flex items-center gap-2">
           <button id="sign-out" type="button" class="sign-out-button hidden"><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Sign out</span></button>
-          <button id="close-dashboard" type="button" aria-label="Close user dashboard" class="text-cyan-200/60 hover:text-white p-2 rounded-lg hover:bg-cyan-900/40 transition">&#10005;</button>
         </div>
       </div>
 

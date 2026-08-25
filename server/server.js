@@ -50,8 +50,10 @@ async function requireUser(request, response, next) {
   next();
 }
 
-function requireAdmin(request, response, next) {
-  if (!adminEmails.has(request.user.email?.toLowerCase())) return response.status(403).json({ error: 'Admin access required.' });
+async function requireAdmin(request, response, next) {
+  const { data: profile } = await admin.from('profiles').select('role').eq('id', request.user.id).maybeSingle();
+  const isConfiguredAdmin = adminEmails.has(request.user.email?.toLowerCase());
+  if (profile?.role !== 'admin' && !isConfiguredAdmin) return response.status(403).json({ error: 'Admin access required.' });
   next();
 }
 

@@ -943,7 +943,10 @@
   const registerMessage = document.getElementById('register-message');
   const adminLoginCard = document.getElementById('admin-login-card');
   const adminAuthMessage = document.getElementById('admin-auth-message');
+  const passwordSetupCard = document.getElementById('password-setup-card');
+  const passwordSetupMessage = document.getElementById('password-setup-message');
   const signOutButton = document.getElementById('sign-out');
+  let pendingAdminLogin = false;
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -997,6 +1000,7 @@
     document.getElementById('login-card').classList.toggle('hidden', view !== 'login');
     document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
     adminLoginCard.classList.toggle('hidden', view !== 'admin');
+    passwordSetupCard.classList.toggle('hidden', view !== 'password');
   }
 
   function showDashboardView(viewId) {
@@ -1010,6 +1014,7 @@
   document.getElementById('welcome-admin').addEventListener('click', () => showAuthView('admin'));
   document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
+  document.getElementById('login-to-admin').addEventListener('click', () => showAuthView('admin'));
   async function submitAuth(mode) {
     const register = mode === 'register';
     const email = document.getElementById(register ? 'register-email' : 'login-email').value.trim();
@@ -1035,13 +1040,60 @@
     event.preventDefault();
     submitAuth('register');
   });
+  document.getElementById('password-setup-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const password = document.getElementById('system-password').value;
+    const confirmation = document.getElementById('system-password-confirm').value;
+    const submitButton = document.querySelector('.password-setup-submit');
+    if (password !== confirmation) {
+      passwordSetupMessage.textContent = 'Passwords do not match.';
+      return;
+    }
+    submitButton.disabled = true;
+    submitButton.textContent = 'Saving password...';
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if (error) {
+      passwordSetupMessage.textContent = error.message;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Save password and continue';
+      return;
+    }
+    showDashboard();
+  });
   async function submitAdminAuth() {
     const email = document.getElementById('admin-login-email').value.trim();
     const password = document.getElementById('admin-login-password').value;
+    const submitButton = document.querySelector('#admin-login-form button[type="submit"]');
+    const submitLabel = submitButton.querySelector('span');
     adminAuthMessage.textContent = '';
+    submitButton.disabled = true;
+    submitLabel.textContent = 'Verifying access...';
     if (supabaseClient) {
+      pendingAdminLogin = true;
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) { adminAuthMessage.textContent = error.message; return; }
+      if (error) {
+        pendingAdminLogin = false;
+        adminAuthMessage.textContent = error.message;
+        submitButton.disabled = false;
+        submitLabel.textContent = 'Enter control room';
+        return;
+      }
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', (await supabaseClient.auth.getUser()).data.user.id)
+        .single();
+      if (profileError || profile?.role !== 'admin') {
+        await supabaseClient.auth.signOut();
+        pendingAdminLogin = false;
+        authScreen.classList.remove('hidden');
+        showAuthView('admin');
+        adminAuthMessage.textContent = 'This account does not have admin access.';
+        submitButton.disabled = false;
+        submitLabel.textContent = 'Enter control room';
+        return;
+      }
+      pendingAdminLogin = false;
     } else {
       localStorage.setItem('nai-demo-admin', JSON.stringify({ email }));
     }
@@ -1073,14 +1125,14 @@
 
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
-      if (session) showDashboard();
+      const isGoogleUser = session?.user?.app_metadata?.provider === 'google';
+      if (session && !pendingAdminLogin && isGoogleUser && _event === 'SIGNED_IN') showAuthView('password');
+      else if (session && !pendingAdminLogin) showDashboard();
       else if (_event === 'SIGNED_OUT') showAuthScreen();
     });
   } else if (getDemoUser()) {
     showDashboard();
   }
-
-  document.getElementById('close-dashboard').addEventListener('click', () => userDashboard.classList.add('hidden'));
 
   signOutButton.addEventListener('click', async () => {
     signOutButton.classList.add('is-signing-out');
