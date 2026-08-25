@@ -966,6 +966,22 @@
     sessionStorage.removeItem('nai-pending-verification');
   }
 
+  async function requestCustomVerification(email) {
+    const response = await fetch('/api/auth/request-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Could not send the verification email.');
+  }
+
+  async function isCustomEmailVerified(email) {
+    const response = await fetch(`/api/auth/status?email=${encodeURIComponent(email)}`);
+    const result = await response.json().catch(() => ({}));
+    return response.ok && result.verified === true;
+  }
+
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -1118,6 +1134,33 @@
       registerButton.disabled = true;
       if (registerLabel) registerLabel.textContent = 'Creating account...';
     }
+    if (register) {
+      try {
+        await requestCustomVerification(email);
+        setPendingVerification(email, password);
+      } catch (error) {
+        pendingSignup = false;
+        registerMessage.textContent = error.message;
+        if (registerButton) {
+          registerButton.disabled = false;
+          if (registerLabel) registerLabel.textContent = 'Create account';
+        }
+        return;
+      }
+    } else {
+      try {
+        if (!(await isCustomEmailVerified(email))) {
+          setPendingVerification(email, password);
+          document.getElementById('verification-email').textContent = email;
+          verificationMessage.textContent = 'Verify your email before logging in. A new code can be sent below.';
+          showAuthView('verification');
+          return;
+        }
+      } catch (error) {
+        authMessage.textContent = 'Verification service is unavailable. Please try again.';
+        return;
+      }
+    }
     if (supabaseClient) {
       const result = register
         ? await supabaseClient.auth.signUp({
@@ -1144,7 +1187,7 @@
           return;
         }
         const message = errorMessage.includes('confirmation email')
-          ? 'Account creation is blocked because Supabase could not send the confirmation email. Check SMTP settings, sender email, and active Resend API key.'
+          ? 'Disable Supabase email confirmations. NAI now sends verification emails through Resend.'
           : result.error.message;
         (register ? registerMessage : authMessage).textContent = message;
         if (register && registerButton) {
@@ -1189,26 +1232,32 @@
     const submitButton = document.querySelector('.verification-submit');
     submitButton.disabled = true;
     submitButton.textContent = 'Verifying...';
-    const { error } = await supabaseClient.auth.verifyOtp({ email: pendingVerification.email, token: code, type: 'signup' });
-    if (error) {
-      verificationMessage.textContent = error.message;
+    const response = await fetch('/api/auth/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingVerification.email, code })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      verificationMessage.textContent = result.error || 'Verification failed.';
       submitButton.disabled = false;
       submitButton.textContent = 'Verify and continue';
       return;
     }
+    const verifiedEmail = pendingVerification.email;
     clearPendingVerification();
-    showDashboard();
+    document.getElementById('login-email').value = verifiedEmail;
+    authMessage.textContent = 'Email verified. Log in to continue.';
+    showAuthView('login');
   });
   document.getElementById('resend-verification').addEventListener('click', async () => {
     if (!pendingVerification) return;
-    const { error } = await supabaseClient.auth.resend({
-      type: 'signup',
-      email: pendingVerification.email,
-      options: {
-        emailRedirectTo: supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`
-      }
-    });
-    verificationMessage.textContent = error ? error.message : 'A new verification code was sent.';
+    try {
+      await requestCustomVerification(pendingVerification.email);
+      verificationMessage.textContent = 'A new verification email was sent.';
+    } catch (error) {
+      verificationMessage.textContent = error.message;
+    }
   });
   document.getElementById('password-setup-form').addEventListener('submit', async event => {
     event.preventDefault();
