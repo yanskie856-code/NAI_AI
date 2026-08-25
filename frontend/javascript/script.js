@@ -958,6 +958,7 @@
   let pendingVerification = JSON.parse(sessionStorage.getItem('nai-pending-verification') || 'null');
   let pendingSignup = false;
   let logoutTransitionActive = false;
+  let authStateHandling = false;
 
   function setPendingVerification(email, password = null, nextView = 'login') {
     pendingVerification = { email, nextView, ...(password ? { password } : {}) };
@@ -1102,6 +1103,7 @@
     verificationMessage.textContent = '';
     passwordSetupMessage.textContent = '';
     clearPendingVerification();
+    Object.keys(sessionStorage).filter(key => key.startsWith('nai-google-verification-requested:')).forEach(key => sessionStorage.removeItem(key));
     localStorage.removeItem('nai-demo-user');
     localStorage.removeItem('nai-demo-admin');
     await new Promise(resolve => setTimeout(resolve, 520));
@@ -1404,10 +1406,13 @@
 
   if (supabaseClient) {
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      if (authStateHandling) return;
+      authStateHandling = true;
       const isGoogleUser = session?.user?.app_metadata?.provider === 'google';
       const hasSystemPassword = session?.user?.id && localStorage.getItem(`nai-password-ready-${session.user.id}`) === 'true';
-      if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) {
-        try {
+      try {
+        if (session && !pendingAdminLogin && !pendingSignup && isGoogleUser && ['SIGNED_IN', 'INITIAL_SESSION'].includes(_event)) {
+          try {
           const verified = await isCustomEmailVerified(session.user.email);
           const requestKey = `nai-google-verification-requested:${session.user.email}`;
           if (!verified) {
@@ -1424,17 +1429,19 @@
           } else {
             showDashboard();
           }
-        } catch (error) {
-          setPendingVerification(session.user.email, null, hasSystemPassword ? 'dashboard' : 'password');
-          document.getElementById('verification-email').textContent = session.user.email;
-          verificationMessage.textContent = error.message || 'Could not send the verification email.';
-          showAuthView('verification');
-        }
+          } catch (error) {
+            setPendingVerification(session.user.email, null, hasSystemPassword ? 'dashboard' : 'password');
+            document.getElementById('verification-email').textContent = session.user.email;
+            verificationMessage.textContent = error.message || 'Could not send the verification email.';
+            showAuthView('verification');
+          }
+        } else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
+        else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
+        else if (_event === 'INITIAL_SESSION') showAuthView('welcome');
+        else if (_event === 'SIGNED_OUT' && !logoutTransitionActive) showAuthScreen();
+      } finally {
+        authStateHandling = false;
       }
-      else if (session && !pendingAdminLogin && !pendingSignup && !session.user.email_confirmed_at) showAuthView('verification');
-      else if (session && !pendingAdminLogin && !pendingSignup) showDashboard();
-      else if (_event === 'INITIAL_SESSION') showAuthView('welcome');
-      else if (_event === 'SIGNED_OUT' && !logoutTransitionActive) showAuthScreen();
     });
   } else if (getDemoUser()) {
     showDashboard();

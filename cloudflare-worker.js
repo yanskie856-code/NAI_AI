@@ -105,7 +105,10 @@ export default {
     if (url.pathname === '/api/auth/status' && request.method === 'GET') return verificationStatus(request, env);
     const assetPath = url.pathname === '/' ? '/index.html' : url.pathname;
     const assetUrl = new URL(assetPath, request.url);
-
-    return env.ASSETS.fetch(new Request(assetUrl, request));
+    const response = await env.ASSETS.fetch(new Request(assetUrl, request));
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('CDN-Cache-Control', 'no-store');
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
 };
