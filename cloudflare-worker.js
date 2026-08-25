@@ -96,6 +96,31 @@ async function verificationStatus(request, env) {
   return json({ verified: Boolean(record?.verified_at) });
 }
 
+async function saveEmbedConfig(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const token = typeof body.token === 'string' ? body.token : '';
+  const systemName = typeof body.systemName === 'string' ? body.systemName.trim().slice(0, 120) : '';
+  const documents = Array.isArray(body.documents) ? body.documents.slice(0, 100).map(document => ({
+    fileName: String(document.fileName || '').slice(0, 255),
+    text: String(document.text || '').slice(0, 200000)
+  })) : [];
+  if (!token || !systemName || !documents.length) return json({ error: 'System name and knowledge are required.' }, 400);
+  const now = Math.floor(Date.now() / 1000);
+  await env.AUTH_DB.prepare(`
+    insert into embed_configs (token_hash, system_name, position, mode, documents_json, expires_at, created_at)
+    values (?, ?, ?, ?, ?, ?, ?)
+    on conflict(token_hash) do update set system_name = excluded.system_name, position = excluded.position, mode = excluded.mode, documents_json = excluded.documents_json, expires_at = excluded.expires_at
+  `).bind(await hash(token), systemName, body.position || 'bottom-right', body.mode || 'mascot', JSON.stringify(documents), now + 30 * 86400, now).run();
+  return json({ ok: true });
+}
+
+async function getEmbedConfig(request, env) {
+  const token = new URL(request.url).searchParams.get('token') || '';
+  const record = await env.AUTH_DB.prepare('select system_name, position, mode, documents_json, expires_at from embed_configs where token_hash = ?').bind(await hash(token)).first();
+  if (!record || record.expires_at < Math.floor(Date.now() / 1000)) return json({ error: 'Invalid or expired embed token.' }, 404);
+  return json({ name: record.system_name, position: record.position, mode: record.mode, documents: JSON.parse(record.documents_json) });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -103,6 +128,8 @@ export default {
     if (url.pathname === '/api/auth/verify-code' && request.method === 'POST') return verifyCode(request, env);
     if (url.pathname === '/api/auth/verify-email' && request.method === 'GET') return verifyLink(request, env);
     if (url.pathname === '/api/auth/status' && request.method === 'GET') return verificationStatus(request, env);
+    if (url.pathname === '/api/embed/config' && request.method === 'POST') return saveEmbedConfig(request, env);
+    if (url.pathname === '/api/embed/config' && request.method === 'GET') return getEmbedConfig(request, env);
     const assetPath = url.pathname === '/' ? '/index.html' : url.pathname;
     const assetUrl = new URL(assetPath, request.url);
     const response = await env.ASSETS.fetch(new Request(assetUrl, request));

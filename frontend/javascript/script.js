@@ -1605,6 +1605,18 @@
     const token = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
     if (!token) return;
 
+    try {
+      const response = await fetch(`/api/embed/config?token=${encodeURIComponent(token)}`, { cache: 'no-store' });
+      if (response.ok) {
+        const config = await response.json();
+        configureNAI({ name: config.name });
+        (config.documents || []).forEach(document => attachDocument(document.fileName, document.text));
+        return;
+      }
+    } catch (error) {
+      console.warn('Remote NAI system configuration could not be restored.');
+    }
+
     const saved = localStorage.getItem(`nai-system-${token}`);
     if (saved) {
       try {
@@ -1686,7 +1698,7 @@
     else knowledgeStatus.textContent = 'Choose a TXT or DOCX guide.';
   });
 
-  document.getElementById('generate-link').addEventListener('click', () => {
+  document.getElementById('generate-link').addEventListener('click', async () => {
     const name = systemName.value.trim() || 'My Connected System';
     configureNAI({ name });
     const token = createEmbedToken();
@@ -1702,6 +1714,17 @@
     embedLink.value = url;
     embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" style="position:fixed;${positionStyle};border:0;background:transparent" allow="clipboard-write"></iframe>`;
     localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
+    try {
+      const response = await fetch('/api/embed/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, systemName: name, position, mode, documents: attachedSystem.documents })
+      });
+      if (!response.ok) throw new Error('Remote embed configuration failed.');
+      knowledgeStatus.textContent = `${attachedSystem.documents.length} guide file(s) secured for this client link.`;
+    } catch (error) {
+      knowledgeStatus.textContent = 'Could not publish the client link. Try again.';
+    }
   });
 
   document.getElementById('copy-link').addEventListener('click', () => copyText(embedLink));
