@@ -290,6 +290,7 @@ body {
 
 .sign-out-button { display: inline-flex; align-items: center; gap: 0.45rem; border: 1px solid rgba(103, 232, 249, 0.2); border-radius: 999px; background: rgba(8, 47, 73, 0.38); color: rgba(207, 250, 254, 0.72); padding: 0.5rem 0.75rem; font-size: 0.7rem; transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease; }
 .sign-out-button:hover { border-color: rgba(103, 232, 249, 0.65); background: rgba(8, 145, 178, 0.24); color: white; transform: translateY(-1px); }
+.sign-out-status-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45); animation: user-status-pulse 1.8s ease-out infinite; }
 .sign-out-icon { display: inline-block; transition: transform 220ms ease; }
 .sign-out-button:hover .sign-out-icon { transform: translateX(3px); }
 .sign-out-button.is-signing-out { pointer-events: none; color: #a5f3fc; animation: sign-out-pulse 650ms ease both; }
@@ -491,6 +492,23 @@ body {
   animation: admin-atmosphere 9s ease-in-out infinite alternate;
 }
 
+.user-dashboard::before {
+  background: repeating-linear-gradient(115deg, transparent 0 110px, rgba(34, 211, 238, 0.045) 111px 112px), repeating-linear-gradient(25deg, transparent 0 150px, rgba(59, 130, 246, 0.035) 151px 152px);
+  animation: user-grid-drift 34s linear infinite;
+}
+
+.user-dashboard::after {
+  background: radial-gradient(circle at 8% 18%, rgba(34, 211, 238, 0.12), transparent 20%), radial-gradient(circle at 92% 82%, rgba(59, 130, 246, 0.1), transparent 24%);
+  animation: user-atmosphere 11s ease-in-out infinite alternate;
+}
+
+.user-dashboard .admin-panel {
+  position: relative;
+  z-index: 1;
+  background: rgba(5, 18, 28, 0.82) !important;
+  box-shadow: inset 0 1px 0 rgba(165, 243, 252, 0.06), 0 20px 80px rgba(0, 0, 0, 0.25);
+}
+
 .admin-header,
 .admin-layout {
   position: relative;
@@ -501,6 +519,13 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.dashboard-header-copy {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 3.5rem;
+  text-align: center;
 }
 
 .admin-sign-out {
@@ -526,6 +551,9 @@ body {
 @keyframes admin-atmosphere { from { transform: scale(0.96); opacity: 0.6; } to { transform: scale(1.05); opacity: 1; } }
 @keyframes admin-status-pulse { 70% { box-shadow: 0 0 0 7px rgba(251, 113, 133, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); } }
 @keyframes admin-logout-exit { 50% { transform: translateX(7px); opacity: 0.45; } }
+@keyframes user-grid-drift { to { transform: translate3d(-75px, 55px, 0); } }
+@keyframes user-atmosphere { from { transform: scale(0.97); opacity: 0.6; } to { transform: scale(1.05); opacity: 1; } }
+@keyframes user-status-pulse { 70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); } }
 
 .admin-panel {
   animation: admin-panel-in 180ms ease-out;
@@ -768,6 +796,10 @@ body {
 
   .admin-panel {
     border-radius: 1.25rem;
+  }
+
+  .dashboard-header-copy {
+    padding-inline: 0.75rem;
   }
 
   .dashboard-sidebar {
