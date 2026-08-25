@@ -10,6 +10,24 @@ body {
   overflow-x: hidden;
 }
 
+.auth-screen::before,
+.auth-screen::after {
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+  content: '';
+}
+
+.auth-screen::before {
+  background: repeating-linear-gradient(115deg, transparent 0 88px, rgba(103, 232, 249, 0.035) 89px 90px), repeating-linear-gradient(25deg, transparent 0 120px, rgba(244, 114, 182, 0.025) 121px 122px);
+  animation: auth-drift 24s linear infinite;
+}
+
+.auth-screen::after {
+  background: radial-gradient(circle at 20% 70%, rgba(244, 114, 182, 0.08), transparent 22%), radial-gradient(circle at 80% 35%, rgba(34, 211, 238, 0.08), transparent 24%);
+  animation: auth-pulse 8s ease-in-out infinite alternate;
+}
+
 .auth-welcome {
   display: flex;
   min-height: 100%;
@@ -64,6 +82,18 @@ body {
 .auth-action-bar > * {
   flex: 1;
 }
+
+.auth-admin-link {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.75rem;
+  z-index: 45;
+  color: rgba(251, 113, 133, 0.7);
+  font-size: 0.7rem;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.auth-admin-link:hover { color: #fda4af; transform: translateX(3px); }
 
 .auth-form-card {
   position: absolute;
@@ -161,6 +191,33 @@ body {
   padding: 1.75rem;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), 0 0 40px rgba(8, 145, 178, 0.12);
 }
+
+.admin-login-card {
+  border-color: rgba(244, 114, 182, 0.28);
+  background: linear-gradient(145deg, rgba(25, 8, 23, 0.98), rgba(8, 8, 18, 0.97));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 55px rgba(244, 63, 94, 0.14);
+}
+
+.admin-login-mark { display: flex; gap: 0.3rem; margin: 0 auto 1rem; width: fit-content; }
+.admin-login-mark span { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #fb7185; box-shadow: 0 0 12px rgba(251, 113, 133, 0.8); animation: admin-mark-pulse 1.4s ease-in-out infinite; }
+.admin-login-mark span:nth-child(2) { animation-delay: 160ms; }
+.admin-login-mark span:nth-child(3) { animation-delay: 320ms; }
+.admin-login-submit { display: flex; align-items: center; justify-content: center; gap: 0.65rem; }
+.admin-login-arrow { transition: transform 180ms ease; }
+.admin-login-submit:hover .admin-login-arrow { transform: translateX(4px); }
+
+.sign-out-button { display: inline-flex; align-items: center; gap: 0.45rem; border: 1px solid rgba(103, 232, 249, 0.2); border-radius: 999px; background: rgba(8, 47, 73, 0.38); color: rgba(207, 250, 254, 0.72); padding: 0.5rem 0.75rem; font-size: 0.7rem; transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease; }
+.sign-out-button:hover { border-color: rgba(103, 232, 249, 0.65); background: rgba(8, 145, 178, 0.24); color: white; transform: translateY(-1px); }
+.sign-out-icon { display: inline-block; transition: transform 220ms ease; }
+.sign-out-button:hover .sign-out-icon { transform: translateX(3px); }
+.sign-out-button.is-signing-out { pointer-events: none; color: #a5f3fc; animation: sign-out-pulse 650ms ease both; }
+.sign-out-button.is-signing-out .sign-out-icon { animation: sign-out-arrow 650ms ease both; }
+
+@keyframes auth-drift { to { transform: translate3d(90px, -70px, 0); } }
+@keyframes auth-pulse { from { transform: scale(0.96); opacity: 0.65; } to { transform: scale(1.04); opacity: 1; } }
+@keyframes admin-mark-pulse { 50% { transform: translateY(-3px); opacity: 0.5; } }
+@keyframes sign-out-pulse { 50% { box-shadow: 0 0 0 5px rgba(103, 232, 249, 0.08); } }
+@keyframes sign-out-arrow { 50% { transform: translateX(8px); opacity: 0.35; } }
 
 .auth-tab {
   border-radius: 0.65rem;
@@ -445,6 +502,11 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     transform: none;
+  }
+
+  .auth-admin-link {
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   .auth-action-bar button {

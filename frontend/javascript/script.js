@@ -941,6 +941,9 @@
   const authScreen = document.getElementById('auth-screen');
   const authMessage = document.getElementById('auth-message');
   const registerMessage = document.getElementById('register-message');
+  const adminLoginCard = document.getElementById('admin-login-card');
+  const adminAuthMessage = document.getElementById('admin-auth-message');
+  const signOutButton = document.getElementById('sign-out');
 
   function getDemoUser() {
     const savedUser = localStorage.getItem('nai-demo-user');
@@ -985,14 +988,15 @@
   function showAuthScreen() {
     userDashboard.classList.add('hidden');
     authScreen.classList.remove('hidden');
-    authMessage.textContent = 'You have been signed out.';
-    showAuthView('welcome');
+    authMessage.textContent = 'You have been signed out. Log in to continue.';
+    showAuthView('login');
   }
 
   function showAuthView(view) {
     document.getElementById('auth-welcome').classList.toggle('hidden', view !== 'welcome');
     document.getElementById('login-card').classList.toggle('hidden', view !== 'login');
     document.getElementById('register-card').classList.toggle('hidden', view !== 'register');
+    adminLoginCard.classList.toggle('hidden', view !== 'admin');
   }
 
   function showDashboardView(viewId) {
@@ -1003,6 +1007,7 @@
 
   document.getElementById('welcome-login').addEventListener('click', () => showAuthView('login'));
   document.getElementById('welcome-register').addEventListener('click', () => showAuthView('register'));
+  document.getElementById('welcome-admin').addEventListener('click', () => showAuthView('admin'));
   document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
   async function submitAuth(mode) {
@@ -1030,6 +1035,26 @@
     event.preventDefault();
     submitAuth('register');
   });
+  async function submitAdminAuth() {
+    const email = document.getElementById('admin-login-email').value.trim();
+    const password = document.getElementById('admin-login-password').value;
+    adminAuthMessage.textContent = '';
+    if (supabaseClient) {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) { adminAuthMessage.textContent = error.message; return; }
+    } else {
+      localStorage.setItem('nai-demo-admin', JSON.stringify({ email }));
+    }
+    authScreen.classList.add('hidden');
+    adminPortal.classList.remove('hidden');
+    showAdminView('admin-overview-view');
+  }
+
+  document.getElementById('admin-login-form').addEventListener('submit', event => {
+    event.preventDefault();
+    submitAdminAuth();
+  });
+  document.getElementById('admin-to-login').addEventListener('click', () => showAuthView('login'));
   async function signInWithGoogle(messageElement) {
     if (supabaseClient) {
       const redirectTo = supabaseConfig.appUrl || `${window.location.origin}${window.location.pathname}`;
@@ -1057,10 +1082,15 @@
 
   document.getElementById('close-dashboard').addEventListener('click', () => userDashboard.classList.add('hidden'));
 
-  document.getElementById('sign-out').addEventListener('click', async () => {
+  signOutButton.addEventListener('click', async () => {
+    signOutButton.classList.add('is-signing-out');
     if (supabaseClient) await supabaseClient.auth.signOut();
     localStorage.removeItem('nai-demo-user');
-    showAuthScreen();
+    localStorage.removeItem('nai-demo-admin');
+    setTimeout(() => {
+      signOutButton.classList.remove('is-signing-out');
+      showAuthScreen();
+    }, 650);
   });
 
   document.querySelector('.auth-forgot').addEventListener('click', async () => {
@@ -1166,7 +1196,8 @@
     if (event.key.toLowerCase() !== 'q') return;
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
-    adminPortal.classList.toggle('hidden');
+    authScreen.classList.remove('hidden');
+    showAuthView('admin');
   });
 
   knowledgeFile.addEventListener('change', async () => {
