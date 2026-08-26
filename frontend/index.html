@@ -122,7 +122,7 @@
   </div>
 
   <!-- FLOATING AI WIDGET CONTAINER -->
-  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+  <div class="fixed bottom-6 left-6 right-auto z-50 flex flex-col items-start pointer-events-none">
     
     <!-- MESSENGER POPUP CARD -->
     <div id="chat-card" class="pointer-events-auto transition-all duration-300 ease-out transform translate-y-8 opacity-0 scale-95 hidden w-[380px] h-[520px] mb-4 rounded-3xl bg-[#0b0518]/85 border border-purple-500/30 backdrop-blur-xl chat-shadow flex flex-col overflow-hidden">
@@ -289,7 +289,7 @@
             <div id="knowledge-status" class="knowledge-status min-h-6 text-xs text-purple-200/70" aria-live="polite">No guide attached yet.</div>
             <input id="knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" />
           </label>
-          <div class="grid gap-3 sm:grid-cols-2"><label class="block text-sm font-medium text-purple-100">Mascot position<select id="embed-position" class="admin-input mt-2"><option value="bottom-right">Bottom right</option><option value="bottom-left">Bottom left</option><option value="top-right">Top right</option><option value="top-left">Top left</option></select></label><label class="block text-sm font-medium text-purple-100">Widget mode<select id="embed-mode" class="admin-input mt-2"><option value="mascot">Mascot and conversation</option><option value="conversation">Conversation panel</option></select></label></div>
+          <div><label class="block text-sm font-medium text-purple-100">Widget mode<select id="embed-mode" class="admin-input mt-2"><option value="mascot">Mascot and conversation</option><option value="conversation">Conversation panel</option></select></label></div>
           <button id="generate-link" type="button" class="w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-950/30 hover:from-purple-500 hover:to-pink-500 transition">Generate secure client code</button>
             </div>
           </section>

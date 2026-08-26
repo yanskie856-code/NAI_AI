@@ -969,7 +969,6 @@
   const embedCode = document.getElementById('embed-code');
   const requesterEmail = document.getElementById('requester-email');
   const knowledgeDropzone = document.getElementById('knowledge-dropzone');
-  const embedPosition = document.getElementById('embed-position');
   const embedMode = document.getElementById('embed-mode');
   const userDashboard = document.getElementById('user-dashboard');
   const authStatus = document.getElementById('auth-status');
@@ -1772,15 +1771,10 @@
     const name = systemName.value.trim() || 'My Connected System';
     configureNAI({ name });
     const token = createEmbedToken();
-    const position = embedPosition?.value || 'bottom-right';
+    const position = 'bottom-left';
     const mode = embedMode?.value || 'mascot';
     const url = `${window.location.origin}${window.location.pathname}?embed=1&position=${position}&mode=${mode}#nai-token=${token}`;
-    const positionStyle = {
-      'bottom-right': 'right:16px;bottom:16px',
-      'bottom-left': 'left:16px;bottom:16px',
-      'top-right': 'right:16px;top:16px',
-      'top-left': 'left:16px;top:16px'
-    }[position] || 'right:16px;bottom:16px';
+    const positionStyle = 'left:16px;bottom:16px';
     embedLink.value = url;
     embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" style="position:fixed;${positionStyle};border:0;background:transparent" allow="clipboard-write"></iframe>`;
     localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
@@ -1878,6 +1872,5 @@
 
   const embedParams = new URLSearchParams(window.location.search);
   if (embedParams.has('embed')) {
-    document.body.classList.add(`embed-position-${embedParams.get('position') || 'bottom-right'}`);
     document.body.classList.add(`embed-${embedParams.get('mode') || 'mascot'}`);
   }

@@ -19,14 +19,11 @@ body.embed-mode > #admin-portal {
 }
 
 body.embed-mode > .fixed.bottom-6.right-6 {
-  inset: auto 1rem 1rem auto;
+  inset: auto auto 1rem 1rem;
   width: 420px;
   height: 620px;
 }
 
-body.embed-mode.embed-position-bottom-left > .fixed.bottom-6.right-6 { right: auto; left: 1rem; }
-body.embed-mode.embed-position-top-right > .fixed.bottom-6.right-6 { top: 1rem; bottom: auto; }
-body.embed-mode.embed-position-top-left > .fixed.bottom-6.right-6 { top: 1rem; right: auto; bottom: auto; left: 1rem; }
 body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { display: none; }
 
 #knowledge-dropzone.is-dragging {
