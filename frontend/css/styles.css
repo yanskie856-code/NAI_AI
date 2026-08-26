@@ -1099,7 +1099,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 
   .user-dashboard .dashboard-header-copy {
     padding-inline: 0;
-    text-align: left;
+    text-align: center;
   }
 
   .user-dashboard .dashboard-header-copy h2 {
@@ -1108,6 +1108,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 
   .user-dashboard .dashboard-header-copy p:last-child {
     max-width: 18rem;
+    margin-inline: auto;
     font-size: 0.72rem;
     line-height: 1.45;
   }
@@ -1144,6 +1145,12 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     margin: 0;
     padding: 0.65rem 0.75rem;
     white-space: normal;
+  }
+
+  .user-dashboard .dashboard-sidebar .sign-out-button {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.45rem;
   }
 
   .user-dashboard .dashboard-content {
