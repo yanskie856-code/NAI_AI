@@ -1771,10 +1771,10 @@
     const name = systemName.value.trim() || 'My Connected System';
     configureNAI({ name });
     const token = createEmbedToken();
-    const position = 'bottom-left';
+    const position = 'bottom-right';
     const mode = embedMode?.value || 'mascot';
     const url = `${window.location.origin}${window.location.pathname}?embed=1&position=${position}&mode=${mode}#nai-token=${token}`;
-    const positionStyle = 'left:16px;bottom:16px';
+    const positionStyle = 'right:16px;bottom:16px';
     embedLink.value = url;
     embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" style="position:fixed;${positionStyle};border:0;background:transparent" allow="clipboard-write"></iframe>`;
     localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
