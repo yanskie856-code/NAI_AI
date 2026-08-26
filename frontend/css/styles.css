@@ -22,8 +22,22 @@ body.embed-mode > .fixed.bottom-6.right-6 {
   inset: auto 1rem 1rem auto;
   right: 1rem !important;
   left: auto !important;
+  bottom: 1rem !important;
   width: 420px;
   height: 620px;
+}
+
+.nai-widget {
+  position: fixed !important;
+  right: 1.5rem !important;
+  bottom: 1.5rem !important;
+  left: auto !important;
+}
+
+body.embed-mode > .nai-widget {
+  right: 1rem !important;
+  bottom: 1rem !important;
+  left: auto !important;
 }
 
 body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { display: none; }
