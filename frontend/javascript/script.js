@@ -1147,11 +1147,12 @@
       ['approved', 'Approved', 'Your private NAI companion is ready to test.'],
       ['rejected', 'Needs changes', 'This request was not approved.']
     ];
-    return groups.map(([status, title, description]) => {
+    const sections = groups.map(([status, title, description]) => {
       const items = requests.filter(request => request.status === status);
       if (!items.length) return '';
       return `<section class="request-group"><div class="request-group-heading"><div><h4>${title}</h4><p>${description}</p></div><span>${items.length}</span></div><div class="request-group-list">${items.map(request => renderRequestCard(request, nameKey, linkKey)).join('')}</div></section>`;
     }).join('');
+    return `<div class="request-groups-grid">${sections}</div>`;
   }
 
   function renderRequestCard(request, nameKey, linkKey) {
