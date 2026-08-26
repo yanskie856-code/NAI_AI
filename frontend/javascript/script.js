@@ -1791,7 +1791,7 @@
 
   function createEmbedCode(url, name) {
     const safeName = name.replace(/["&<>]/g, '');
-    return `<iframe src="${url}" title="${safeName} NAI assistant" width="420" height="700" loading="lazy" style="position:fixed;right:16px;bottom:16px;width:min(420px,calc(100vw - 32px));height:min(700px,calc(100vh - 32px));max-width:100%;max-height:100%;border:0;background:transparent" allow="clipboard-write"></iframe>`;
+    return `<iframe class="nai-embed" src="${url}" title="${safeName} NAI assistant" width="420" height="700" loading="lazy" style="position:fixed;inset:auto 16px 16px auto;width:min(420px,calc(100vw - 32px));height:min(700px,calc(100vh - 32px));max-width:100%;max-height:100%;z-index:2147483000;border:0;background:transparent" allow="clipboard-write"></iframe>`;
   }
 
   function getEmbedPreviewLink(link) {
@@ -2038,7 +2038,7 @@
     const url = `${window.location.origin}${window.location.pathname}?embed=1&position=${position}&mode=${mode}#nai-token=${token}`;
     const positionStyle = 'right:16px;bottom:16px';
     embedLink.value = url;
-    embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="700" loading="lazy" style="position:fixed;${positionStyle};width:min(420px,calc(100vw - 32px));height:min(700px,calc(100vh - 32px));max-width:100%;max-height:100%;border:0;background:transparent" allow="clipboard-write"></iframe>`;
+    embedCode.value = `<iframe class="nai-embed" src="${url}" title="${name} NAI assistant" width="420" height="700" loading="lazy" style="position:fixed;${positionStyle};width:min(420px,calc(100vw - 32px));height:min(700px,calc(100vh - 32px));max-width:100%;max-height:100%;z-index:2147483000;border:0;background:transparent" allow="clipboard-write"></iframe>`;
     const documents = [
       ...attachedSystem.documents,
       ...(sharedBehavior.trim() ? [{ fileName: 'NAI shared behavior.txt', text: sharedBehavior }] : [])
