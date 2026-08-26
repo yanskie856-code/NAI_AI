@@ -898,11 +898,15 @@
     const embedToken = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
     if (embedToken && supabaseConfig.backendUrl) {
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
         const response = await fetch(`${supabaseConfig.backendUrl}/api/assistant`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-nai-token': embedToken },
-          body: JSON.stringify({ message: userText })
+          body: JSON.stringify({ message: userText }),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
         const data = await response.json();
         if (response.ok && data.reply) return data.reply;
       } catch (error) {
@@ -915,14 +919,18 @@
       : null;
 
     if (attachedSystem.respond) {
-      const response = await attachedSystem.respond({
-        message: userText,
-        system: attachedSystem.name,
-        context
-      });
+      try {
+        const response = await attachedSystem.respond({
+          message: userText,
+          system: attachedSystem.name,
+          context
+        });
 
-      if (typeof response === 'string' && response.trim()) {
-        return response;
+        if (typeof response === 'string' && response.trim()) {
+          return response;
+        }
+      } catch (error) {
+        console.warn('NAI custom response handler failed; using local knowledge.');
       }
     }
 
@@ -1844,10 +1852,16 @@
     chatStream.scrollTop = chatStream.scrollHeight;
 
     setTimeout(async () => {
-      typingIndicator.classList.add('hidden');
-      setExpression('happy', 2.0);
-      const reply = await getNAIResponse(text);
-      appendMessage(reply, 'bot');
+      try {
+        const reply = await getNAIResponse(text);
+        appendMessage(reply, 'bot');
+      } catch (error) {
+        console.error('NAI response failed.', error);
+        appendMessage('I could not load that answer right now. Please try again.', 'bot');
+      } finally {
+        typingIndicator.classList.add('hidden');
+        setExpression('happy', 2.0);
+      }
     }, 900);
   });
 
