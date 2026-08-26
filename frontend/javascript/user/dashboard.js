@@ -9,12 +9,14 @@ export function initUserDashboard({ renderRequests, showDashboardView }) {
     sidebar?.classList.remove('is-open');
     menuBackdrop?.classList.remove('is-visible');
     menuToggle?.setAttribute('aria-expanded', 'false');
+    dashboard?.classList.remove('dashboard-menu-open');
   };
 
   menuToggle?.addEventListener('click', () => {
     const isOpen = sidebar?.classList.toggle('is-open') || false;
     menuBackdrop?.classList.toggle('is-visible', isOpen);
     menuToggle.setAttribute('aria-expanded', String(isOpen));
+    dashboard?.classList.toggle('dashboard-menu-open', isOpen);
   });
   menuClose?.addEventListener('click', closeMenu);
   menuBackdrop?.addEventListener('click', closeMenu);
