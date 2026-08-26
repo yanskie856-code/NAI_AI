@@ -1517,6 +1517,15 @@
     button.setAttribute('aria-pressed', String(!isVisible));
   });
 
+  document.getElementById('admin-email-toggle')?.addEventListener('click', event => {
+    const button = event.currentTarget;
+    const emailInput = document.getElementById('admin-login-email');
+    const isVisible = emailInput.type === 'email';
+    emailInput.type = isVisible ? 'password' : 'email';
+    button.setAttribute('aria-label', isVisible ? 'Show admin email' : 'Hide admin email');
+    button.setAttribute('aria-pressed', String(!isVisible));
+  });
+
   document.getElementById('admin-login-form').addEventListener('submit', event => {
     event.preventDefault();
     submitAdminAuth();

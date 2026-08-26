@@ -54,7 +54,7 @@
       <h2>Admin control room</h2>
       <p class="auth-card-copy">Authenticate to manage connected systems and embed access.</p>
       <form id="admin-login-form" class="space-y-3">
-        <label class="auth-field">Admin email<input id="admin-login-email" name="email" type="email" required autocomplete="username" placeholder="admin@example.com" class="admin-input" /></label>
+        <label class="auth-field">Admin email<span class="auth-password-field"><input id="admin-login-email" name="email" type="password" required autocomplete="username" placeholder="admin@example.com" class="admin-input" /><button id="admin-email-toggle" type="button" class="auth-password-toggle" aria-label="Show admin email" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></button></span></label>
         <label class="auth-field">Password<span class="auth-password-field"><input id="admin-login-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password" class="admin-input" /><button id="admin-password-toggle" type="button" class="auth-password-toggle" aria-label="Show admin password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></button></span></label>
         <button type="submit" class="auth-primary admin-login-submit"><span>Enter control room</span><span class="admin-login-arrow" aria-hidden="true">&#8594;</span></button>
       </form>
