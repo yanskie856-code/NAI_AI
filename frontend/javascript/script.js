@@ -1710,7 +1710,7 @@
 
   function createEmbedCode(url, name) {
     const safeName = name.replace(/["&<>]/g, '');
-    return `<iframe src="${url}" title="${safeName} NAI assistant" width="420" height="620" style="position:fixed;right:16px;bottom:16px;border:0;background:transparent" allow="clipboard-write"></iframe>`;
+    return `<iframe src="${url}" title="${safeName} NAI assistant" width="420" height="620" style="position:fixed;left:16px;bottom:16px;border:0;background:transparent" allow="clipboard-write"></iframe>`;
   }
 
   function getEmbedPreviewLink(link) {

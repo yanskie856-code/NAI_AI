@@ -19,9 +19,9 @@ body.embed-mode > #admin-portal {
 }
 
 body.embed-mode > .fixed.bottom-6.right-6 {
-  inset: auto 1rem 1rem auto;
-  right: 1rem !important;
-  left: auto !important;
+  inset: auto auto 1rem 1rem;
+  right: auto !important;
+  left: 1rem !important;
   width: 420px;
   height: 620px;
 }
