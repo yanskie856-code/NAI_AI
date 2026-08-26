@@ -1673,9 +1673,40 @@
     await loadKnowledgeFile(file);
   });
 
+  function showKnowledgeMessage(message) {
+    knowledgeStatus.classList.remove('has-file');
+    knowledgeStatus.textContent = message;
+  }
+
+  function showAttachedFile(file) {
+    const fileType = file.name.toLowerCase().endsWith('.docx') ? 'DOCX' : 'TXT';
+    knowledgeStatus.classList.add('has-file');
+    knowledgeStatus.replaceChildren();
+
+    const typeBadge = document.createElement('span');
+    typeBadge.className = 'knowledge-file-type';
+    typeBadge.textContent = fileType;
+    typeBadge.setAttribute('aria-hidden', 'true');
+
+    const details = document.createElement('span');
+    details.className = 'knowledge-file-details';
+
+    const fileName = document.createElement('span');
+    fileName.className = 'knowledge-file-name';
+    fileName.textContent = file.name;
+    fileName.title = file.name;
+
+    const fileMeta = document.createElement('span');
+    fileMeta.className = 'knowledge-file-meta';
+    fileMeta.textContent = `${file.size < 1024 * 1024 ? `${(file.size / 1024).toFixed(1)} KB` : `${(file.size / (1024 * 1024)).toFixed(1)} MB`} attached`;
+
+    details.append(fileName, fileMeta);
+    knowledgeStatus.append(typeBadge, details);
+  }
+
   async function loadKnowledgeFile(file) {
     if (file.size > 5 * 1024 * 1024) {
-      knowledgeStatus.textContent = 'File is larger than 5 MB.';
+      showKnowledgeMessage('File is larger than 5 MB.');
       return;
     }
 
@@ -1685,10 +1716,9 @@
         : await file.text();
       attachDocument(file.name, text);
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
-      knowledgeStatus.textContent = `${file.name} attached (${text.length.toLocaleString()} characters).`;
-      knowledgeDropzone.classList.add('has-file');
+      showAttachedFile(file);
     } catch (error) {
-      knowledgeStatus.textContent = 'Could not read this file.';
+      showKnowledgeMessage('Could not read this file.');
     }
   }
 
@@ -1702,7 +1732,7 @@
     knowledgeDropzone.classList.remove('is-dragging');
     const file = [...event.dataTransfer.files].find(item => /\.(txt|docx)$/i.test(item.name));
     if (file) await loadKnowledgeFile(file);
-    else knowledgeStatus.textContent = 'Choose a TXT or DOCX guide.';
+    else showKnowledgeMessage('Choose a TXT or DOCX guide.');
   });
 
   document.getElementById('generate-link').addEventListener('click', async () => {
@@ -1728,9 +1758,9 @@
         body: JSON.stringify({ token, systemName: name, position, mode, documents: attachedSystem.documents })
       });
       if (!response.ok) throw new Error('Remote embed configuration failed.');
-      knowledgeStatus.textContent = `${attachedSystem.documents.length} guide file(s) secured for this client link.`;
+      showKnowledgeMessage(`${attachedSystem.documents.length} guide file(s) secured for this client link.`);
     } catch (error) {
-      knowledgeStatus.textContent = 'Could not publish the client link. Try again.';
+      showKnowledgeMessage('Could not publish the client link. Try again.');
     }
   });
 

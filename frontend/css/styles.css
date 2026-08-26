@@ -35,30 +35,54 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   box-shadow: 0 0 24px rgba(34, 211, 238, 0.14);
 }
 
-.knowledge-upload-status {
-  display: inline-flex;
-  max-width: 100%;
+.knowledge-status {
+  width: min(100%, 30rem);
+  color: rgba(207, 250, 254, 0.58);
+}
+
+.knowledge-status.has-file {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 1.75rem;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid rgba(165, 243, 252, 0.14);
-  border-radius: 999px;
-  background: rgba(8, 47, 73, 0.34);
-  color: rgba(207, 250, 254, 0.62);
-  font-size: 0.7rem;
-  line-height: 1.2;
-  text-align: center;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  border-radius: 0.75rem;
+  background: rgba(8, 145, 178, 0.1);
+  text-align: left;
 }
 
-.knowledge-dropzone.has-file .knowledge-upload-icon {
-  color: #67e8f9;
+.knowledge-file-type {
+  display: grid;
+  flex: 0 0 2rem;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(145deg, rgba(34, 211, 238, 0.9), rgba(126, 34, 206, 0.9));
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-.knowledge-dropzone.has-file .knowledge-upload-status {
-  border-color: rgba(52, 211, 153, 0.35);
-  background: rgba(6, 78, 59, 0.3);
-  color: #a7f3d0;
+.knowledge-file-details {
+  min-width: 0;
+}
+
+.knowledge-file-name {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knowledge-file-meta {
+  margin-top: 0.15rem;
+  color: rgba(165, 243, 252, 0.62);
+  font-size: 0.68rem;
 }
 
 .nai-preloader {
