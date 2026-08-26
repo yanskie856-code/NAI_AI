@@ -1128,7 +1128,7 @@
       if (!error) {
         document.getElementById('overview-request-count').textContent = data.length;
         requestList.innerHTML = data.length
-          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a><div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(createEmbedCode(request.embed_link, request.system_name))}</pre></div>` : ''}</article>`).join('')
+          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(getEmbedPreviewLink(request.embed_link))}" target="_blank" rel="noopener">Test your NAI companion in a new tab</a><div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(createEmbedCode(getEmbedPreviewLink(request.embed_link), request.system_name))}</pre></div>` : ''}</article>`).join('')
           : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
         content?.classList.remove('is-refreshing');
         return;
@@ -1650,7 +1650,7 @@
       });
       if (documentError) throw documentError;
     }
-    const embedLink = `${window.location.origin}${window.location.pathname}#nai-token=${rawToken}`;
+    const embedLink = `${window.location.origin}${window.location.pathname}?embed=1&mode=mascot#nai-token=${rawToken}`;
     const { error: updateError } = await supabaseClient.from('system_requests').update({
       status: 'approved', embed_token_id: token.id, embed_link: embedLink, updated_at: new Date().toISOString()
     }).eq('id', requestId);
@@ -1711,6 +1711,13 @@
   function createEmbedCode(url, name) {
     const safeName = name.replace(/["&<>]/g, '');
     return `<iframe src="${url}" title="${safeName} NAI assistant" width="420" height="620" style="position:fixed;right:16px;bottom:16px;border:0;background:transparent" allow="clipboard-write"></iframe>`;
+  }
+
+  function getEmbedPreviewLink(link) {
+    const url = new URL(link, window.location.origin);
+    url.searchParams.set('embed', '1');
+    url.searchParams.set('mode', 'mascot');
+    return url.toString();
   }
 
   function showAdminView(viewId) {
