@@ -1129,19 +1129,35 @@
         .order('created_at', { ascending: false });
       if (!error) {
         document.getElementById('overview-request-count').textContent = data.length;
-        requestList.innerHTML = data.length
-          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(getEmbedPreviewLink(request.embed_link))}" target="_blank" rel="noopener">Test your NAI companion in a new tab</a><div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(createEmbedCode(getEmbedPreviewLink(request.embed_link), request.system_name))}</pre></div>` : ''}</article>`).join('')
-          : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+        requestList.innerHTML = renderRequestGroups(data, 'system_name', 'embed_link');
         content?.classList.remove('is-refreshing');
         return;
       }
     }
     const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
     document.getElementById('overview-request-count').textContent = requests.length;
-    requestList.innerHTML = requests.length
-      ? requests.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.embedLink ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embedLink)}">Open connected NAI</a>` : ''}</article>`).join('')
-      : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+    requestList.innerHTML = renderRequestGroups(requests, 'system', 'embedLink');
     content?.classList.remove('is-refreshing');
+  }
+
+  function renderRequestGroups(requests, nameKey, linkKey) {
+    if (!requests.length) return '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
+    const groups = [
+      ['pending', 'Pending review', 'We are waiting for the admin to review this request.'],
+      ['approved', 'Approved', 'Your private NAI companion is ready to test.'],
+      ['rejected', 'Needs changes', 'This request was not approved.']
+    ];
+    return groups.map(([status, title, description]) => {
+      const items = requests.filter(request => request.status === status);
+      if (!items.length) return '';
+      return `<section class="request-group"><div class="request-group-heading"><div><h4>${title}</h4><p>${description}</p></div><span>${items.length}</span></div><div class="request-group-list">${items.map(request => renderRequestCard(request, nameKey, linkKey)).join('')}</div></section>`;
+    }).join('');
+  }
+
+  function renderRequestCard(request, nameKey, linkKey) {
+    const link = request[linkKey];
+    const previewLink = link ? getEmbedPreviewLink(link) : '';
+    return `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request[nameKey])}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(previewLink)}" target="_blank" rel="noopener">Test your NAI companion in a new tab</a><div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(createEmbedCode(previewLink, request[nameKey]))}</pre></div>` : ''}</article>`;
   }
 
   async function renderAdminRequests() {
