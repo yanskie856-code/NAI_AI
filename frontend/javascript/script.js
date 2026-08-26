@@ -798,17 +798,25 @@
     { keywords: ['help', 'guide', 'support'], response: "I'm right here for you! You can ask me about updates, system shortcuts, or troubleshooting! 💕" },
     { keywords: ['error', 'bug', 'broken', 'issue'], response: "Oh no! A glitch? Let's check your internet connection or try refreshing to fix it right up!" }
   ];
+  const sharedBehaviorKey = 'nai-shared-behavior';
+  let sharedBehavior = localStorage.getItem(sharedBehaviorKey) || '';
+
+  function getSharedKnowledge() {
+    return sharedBehavior.trim()
+      ? [{ keywords: ['hello', 'hi', 'hey', 'greeting', 'morning', 'afternoon', 'evening'], response: sharedBehavior.trim() }]
+      : [];
+  }
 
   const attachedSystem = {
     name: 'NAI Assistant',
-    knowledge: [...defaultKnowledge],
+    knowledge: [...getSharedKnowledge(), ...defaultKnowledge],
     documents: [],
     getContext: null,
     respond: null
   };
   const mainSystem = {
     name: 'NAI Assistant',
-    knowledge: [...defaultKnowledge],
+    knowledge: [...getSharedKnowledge(), ...defaultKnowledge],
     documents: []
   };
   const embedToken = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
@@ -831,7 +839,7 @@
 
   function resetAttachedSystem() {
     attachedSystem.documents = [];
-    attachedSystem.knowledge = [...defaultKnowledge];
+    attachedSystem.knowledge = [...getSharedKnowledge(), ...defaultKnowledge];
   }
 
   function attachMainDocument(fileName, text) {
@@ -844,7 +852,7 @@
   }
 
   function rebuildMainKnowledge() {
-    mainSystem.knowledge = [...defaultKnowledge];
+    mainSystem.knowledge = [...getSharedKnowledge(), ...defaultKnowledge];
     mainSystem.documents.forEach(document => {
       mainSystem.knowledge.push(...createDocumentKnowledge(document.fileName, document.text));
     });
@@ -1020,6 +1028,9 @@
   const mainKnowledgeDropzone = document.getElementById('main-knowledge-dropzone');
   const mainKnowledgeList = document.getElementById('main-knowledge-list');
   const replaceMainKnowledge = document.getElementById('replace-main-knowledge');
+  const sharedBehaviorInput = document.getElementById('nai-shared-behavior');
+  const sharedBehaviorSave = document.getElementById('save-nai-shared-behavior');
+  const sharedBehaviorStatus = document.getElementById('nai-shared-behavior-status');
   const systemName = document.getElementById('system-name');
   const embedLink = document.getElementById('embed-link');
   const embedCode = document.getElementById('embed-code');
@@ -1777,6 +1788,7 @@
     }
     if (viewId === 'admin-main-knowledge-view') {
       document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
+      if (sharedBehaviorInput) sharedBehaviorInput.value = sharedBehavior;
       renderMainKnowledgeList();
     }
     setTimeout(() => content?.classList.remove('is-refreshing'), 220);
@@ -1857,6 +1869,17 @@
     const file = mainKnowledgeFile.files[0];
     if (!file) return;
     await loadMainKnowledgeFile(file);
+  });
+
+  sharedBehaviorSave?.addEventListener('click', () => {
+    sharedBehavior = sharedBehaviorInput.value.trim();
+    if (sharedBehavior) localStorage.setItem(sharedBehaviorKey, sharedBehavior);
+    else localStorage.removeItem(sharedBehaviorKey);
+    attachedSystem.knowledge = [...getSharedKnowledge(), ...defaultKnowledge];
+    rebuildMainKnowledge();
+    sharedBehaviorStatus.textContent = sharedBehavior
+      ? 'Shared behavior saved for NAI and new user companions.'
+      : 'Shared behavior cleared.';
   });
 
   mainKnowledgeList?.addEventListener('click', event => {
@@ -1990,12 +2013,16 @@
     const positionStyle = 'right:16px;bottom:16px';
     embedLink.value = url;
     embedCode.value = `<iframe src="${url}" title="${name} NAI assistant" width="420" height="620" style="position:fixed;${positionStyle};border:0;background:transparent" allow="clipboard-write"></iframe>`;
-    localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents: attachedSystem.documents }));
+    const documents = [
+      ...attachedSystem.documents,
+      ...(sharedBehavior.trim() ? [{ fileName: 'NAI shared behavior.txt', text: sharedBehavior }] : [])
+    ];
+    localStorage.setItem(`nai-system-${token}`, JSON.stringify({ name, requesterEmail: requesterEmail.value.trim(), documents }));
     try {
       const response = await fetch('/api/embed/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, systemName: name, position, mode, documents: attachedSystem.documents })
+        body: JSON.stringify({ token, systemName: name, position, mode, documents })
       });
       if (!response.ok) throw new Error('Remote embed configuration failed.');
       showKnowledgeMessage(`${attachedSystem.documents.length} guide file(s) secured for this client link.`);
