@@ -6,7 +6,7 @@
         <h2 class="mt-1 text-2xl font-bold text-white">Your systems</h2>
         <p id="auth-status" class="mt-2 text-sm text-cyan-100/65">Sign in to request access to a connected system.</p>
       </div>
-      <button id="dashboard-menu-toggle" type="button" class="dashboard-menu-toggle" aria-label="Open workspace menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="dashboard-header-actions"><button id="sign-out" type="button" class="sign-out-button hidden"><span class="sign-out-status-dot" aria-hidden="true"></span><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Log out</span></button><button id="dashboard-menu-toggle" type="button" class="dashboard-menu-toggle" aria-label="Open workspace menu" aria-expanded="false"><span></span><span></span><span></span></button></div>
     </div>
     <div class="grid gap-6 p-6 lg:grid-cols-[180px_0.9fr_1.1fr]">
       <aside class="dashboard-sidebar">
@@ -15,7 +15,7 @@
         <button class="dashboard-nav" type="button" id="dashboard-request-nav" data-dashboard-view="dashboard-request-view">Request system</button>
         <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">Access requests</button>
         <button class="dashboard-nav" type="button" id="dashboard-rejected-nav" data-dashboard-view="dashboard-rejected-view">Rejected requests</button>
-        <button id="sign-out" type="button" class="sign-out-button hidden"><span class="sign-out-status-dot" aria-hidden="true"></span><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Log out</span></button>
+        <button id="sign-out-mobile" type="button" class="sign-out-button mobile-sign-out hidden"><span class="sign-out-status-dot" aria-hidden="true"></span><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Log out</span></button>
       </aside>
       <button id="dashboard-menu-backdrop" type="button" class="dashboard-menu-backdrop" aria-label="Close workspace menu"></button>
       <div class="dashboard-content">

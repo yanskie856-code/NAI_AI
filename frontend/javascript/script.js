@@ -1072,6 +1072,7 @@
   const authAlertTitle = document.getElementById('auth-alert-title');
   const authAlertMessage = document.getElementById('auth-alert-message');
   const signOutButton = document.getElementById('sign-out');
+  const mobileSignOutButton = document.getElementById('sign-out-mobile');
   const naiPreloader = document.getElementById('nai-preloader');
   const preloaderStatus = naiPreloader?.querySelector('.preloader-status');
   let pendingAdminLogin = false;
@@ -1209,6 +1210,7 @@
     const user = await getCurrentUser();
     authStatus.textContent = user ? `Signed in as ${user.email || user.user_metadata?.full_name || 'connected user'}.` : 'Sign in to request access to a connected system.';
     document.getElementById('sign-out').classList.toggle('hidden', !user);
+    mobileSignOutButton?.classList.toggle('hidden', !user);
   }
 
   function showDashboard() {
@@ -1629,6 +1631,12 @@
     signOutButton.classList.add('is-signing-out');
     await completeLogout('login', 'Signing out securely');
     signOutButton.classList.remove('is-signing-out');
+  });
+
+  mobileSignOutButton?.addEventListener('click', async () => {
+    mobileSignOutButton.classList.add('is-signing-out');
+    await completeLogout('login', 'Signing out securely');
+    mobileSignOutButton.classList.remove('is-signing-out');
   });
 
   document.querySelector('.auth-forgot').addEventListener('click', async () => {
