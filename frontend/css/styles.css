@@ -1113,6 +1113,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   }
 
   .user-dashboard .admin-header {
+    position: relative;
     display: grid;
     gap: 0.85rem;
     padding: 1rem;
@@ -1135,6 +1136,9 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   }
 
   .user-dashboard .dashboard-header-actions {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
     display: flex;
     align-items: center;
     gap: 0.45rem;
