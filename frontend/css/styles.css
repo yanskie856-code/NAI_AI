@@ -998,6 +998,53 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     padding: 0.75rem;
   }
 
+  .nai-widget {
+    right: 0.75rem !important;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+    left: 0.75rem !important;
+    width: auto;
+  }
+
+  #chat-card {
+    width: min(100%, 26rem);
+    height: min(70svh, 34rem);
+    max-height: calc(100svh - 7rem);
+    margin-bottom: 0.75rem;
+    border-radius: 1.5rem;
+  }
+
+  #chat-stream {
+    min-width: 0;
+    padding: 0.85rem;
+  }
+
+  #chat-form {
+    min-width: 0;
+    padding: 0.7rem;
+  }
+
+  #chat-form input {
+    min-width: 0;
+  }
+
+  #chat-form button {
+    flex: 0 0 3.25rem;
+    min-height: 3rem;
+  }
+
+  body.embed-mode .nai-widget {
+    right: 0.5rem !important;
+    bottom: calc(0.5rem + env(safe-area-inset-bottom)) !important;
+    left: 0.5rem !important;
+  }
+
+  body.embed-mode #chat-card {
+    width: 100%;
+    height: min(76svh, 34rem);
+    max-height: calc(100svh - 4.5rem);
+    margin-bottom: 0.5rem;
+  }
+
   .auth-welcome {
     min-height: 100svh;
     justify-content: flex-start;
