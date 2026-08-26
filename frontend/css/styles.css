@@ -1121,10 +1121,10 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   }
 
   .auth-action-bar {
-    bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    bottom: calc(1rem + env(safe-area-inset-bottom));
     left: 1rem;
-    width: calc(100% - 2rem);
-    max-width: 26rem;
+    width: min(14rem, calc(100% - 9rem));
+    max-width: none;
     flex-direction: column;
     gap: 0.5rem;
     transform: none;
@@ -1314,8 +1314,9 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   }
 
   .nai-brand-mark {
-    right: 1rem;
-    left: auto;
+    top: 1rem;
+    right: auto;
+    left: 1rem;
   }
 
   .nai-widget {
