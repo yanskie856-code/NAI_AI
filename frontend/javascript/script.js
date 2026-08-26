@@ -1599,11 +1599,17 @@
         ? (await mammoth.extractRawText({ arrayBuffer: await requestKnowledgeFile.arrayBuffer() })).value
         : await requestKnowledgeFile.text();
     }
+    const manualMessage = document.getElementById('request-message').value.trim();
+    if (!manualMessage && !knowledgeContent.trim()) {
+      requestStatus.textContent = 'Add a note or attach a knowledge file before sending.';
+      return;
+    }
+    const requestMessage = manualMessage || `Knowledge provided in ${requestKnowledgeFile.name}.`;
     const request = {
       id: crypto.randomUUID(),
       email: user.email,
       system: document.getElementById('request-system').value.trim(),
-      message: document.getElementById('request-message').value.trim(),
+      message: requestMessage,
       knowledgeContent,
       knowledgeFileName: requestKnowledgeFile?.name || null,
       status: 'pending',

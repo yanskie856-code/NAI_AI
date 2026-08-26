@@ -210,9 +210,10 @@
               <h3 class="text-sm font-semibold text-white">Request system access</h3>
               <p class="mt-1 text-xs text-cyan-100/55">Tell the admin which system you need connected.</p>
             </div>
-            <input id="request-system" required type="text" placeholder="System name" class="admin-input" />
-            <textarea id="request-message" required placeholder="What should NAI know about your system?" class="admin-input admin-code"></textarea>
-            <label class="admin-upload dashboard-knowledge-upload">Attach knowledge file (optional)<input id="request-knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /></label>
+            <label class="dashboard-field"><span>System name</span><input id="request-system" required type="text" placeholder="e.g. BrightDesk Support Portal" class="admin-input" /></label>
+            <label class="dashboard-field"><span>Knowledge note <em>Optional with a guide</em></span><textarea id="request-message" placeholder="Add context about what NAI should help with..." class="admin-input admin-code"></textarea></label>
+            <label class="admin-upload dashboard-knowledge-upload"><span>Knowledge file <em>TXT or DOCX, up to 5 MB</em></span><input id="request-knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><small>Attach a guide and the admin will connect it automatically after approval.</small></label>
+            <div class="dashboard-request-note"><span class="dashboard-request-dot"></span><span>The admin reviews your request before sending a private NAI companion link.</span></div>
             <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/30 hover:from-cyan-500 hover:to-blue-500 transition">Send request</button>
             <p id="request-status" class="min-h-5 text-xs text-cyan-100/65" aria-live="polite"></p>
           </form>
