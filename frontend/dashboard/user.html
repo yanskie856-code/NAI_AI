@@ -13,8 +13,8 @@
         <div class="dashboard-sidebar-heading"><p class="mb-3 text-[10px] uppercase tracking-[0.18em] text-cyan-200/50">Workspace</p><button id="dashboard-menu-close" type="button" class="dashboard-menu-close" aria-label="Close workspace menu">&#10005;</button></div>
         <button class="dashboard-nav dashboard-nav-active" type="button" data-dashboard-view="dashboard-overview-view">Overview</button>
         <button class="dashboard-nav" type="button" id="dashboard-request-nav" data-dashboard-view="dashboard-request-view">Request system</button>
-        <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">Access requests</button>
-        <button class="dashboard-nav" type="button" id="dashboard-rejected-nav" data-dashboard-view="dashboard-rejected-view">Rejected requests</button>
+        <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">My requests</button>
+        <button class="dashboard-nav" type="button" id="dashboard-rejected-nav" data-dashboard-view="dashboard-rejected-view">My rejected requests</button>
         <button id="sign-out-mobile" type="button" class="sign-out-button mobile-sign-out hidden"><span class="sign-out-status-dot" aria-hidden="true"></span><span class="sign-out-icon" aria-hidden="true">&#8594;</span><span class="sign-out-label">Log out</span></button>
       </aside>
       <button id="dashboard-menu-backdrop" type="button" class="dashboard-menu-backdrop" aria-label="Close workspace menu"></button>
@@ -36,11 +36,11 @@
           </form>
         </section>
         <section id="dashboard-access-view" class="dashboard-view dashboard-section hidden">
-          <div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-semibold text-white">Access requests</h3><p class="mt-1 text-xs text-cyan-100/55">Track admin decisions and embed links.</p></div><button id="refresh-requests" type="button" class="admin-copy">Refresh</button></div>
+          <div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-semibold text-white">My requests</h3><p class="mt-1 text-xs text-cyan-100/55">Track admin decisions and embed links.</p></div><button id="refresh-requests" type="button" class="admin-copy">Refresh</button></div>
           <div id="request-list" class="mt-4 space-y-3"><p class="text-xs text-cyan-100/50">No requests yet.</p></div>
         </section>
         <section id="dashboard-rejected-view" class="dashboard-view dashboard-section hidden">
-          <div><h3 class="text-sm font-semibold text-white">Rejected requests</h3><p class="mt-1 text-xs text-cyan-100/55">Review requests that need changes before sending them again.</p></div>
+          <div><h3 class="text-sm font-semibold text-white">My rejected requests</h3><p class="mt-1 text-xs text-cyan-100/55">Review requests that need changes before sending them again.</p></div>
           <div id="rejected-request-list" class="mt-4 space-y-3"><p class="text-xs text-cyan-100/50">No rejected requests.</p></div>
         </section>
       </div>
