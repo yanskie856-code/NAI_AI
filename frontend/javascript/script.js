@@ -830,6 +830,38 @@
     ));
   }
 
+  function findGuideSection(documents, message) {
+    const queryWords = message.toLowerCase().split(/\W+/).filter(word => word.length > 3);
+    let bestSection = null;
+    let bestScore = 0;
+
+    for (const document of documents) {
+      const sections = [];
+      let currentSection = null;
+      for (const line of document.text.split(/\r?\n/).map(value => value.trim()).filter(Boolean)) {
+        if (/^[A-Z][A-Z0-9 &'/-]{2,}$/.test(line)) {
+          currentSection = { title: line, lines: [] };
+          sections.push(currentSection);
+        } else if (currentSection) {
+          currentSection.lines.push(line);
+        }
+      }
+
+      for (const section of sections) {
+        const sectionText = `${section.title} ${section.lines.join(' ')}`.toLowerCase();
+        const matchingWords = queryWords.filter(word => sectionText.includes(word));
+        const headingMatches = queryWords.filter(word => section.title.toLowerCase().includes(word));
+        const score = matchingWords.length * 2 + headingMatches.length * 6;
+        if (score > bestScore) {
+          bestScore = score;
+          bestSection = { fileName: document.fileName, ...section };
+        }
+      }
+    }
+
+    return bestSection;
+  }
+
   function configureNAI(options = {}) {
     if (typeof options.name === 'string' && options.name.trim()) {
       attachedSystem.name = options.name.trim();
@@ -894,22 +926,10 @@
       }
     }
 
-    const lower = userText.toLowerCase();
-    const queryWords = lower.split(/\W+/).filter(word => word.length > 3);
-    let bestParagraph = null;
-    let bestScore = 0;
-    for (const document of attachedSystem.documents) {
-      for (const paragraph of document.text.split(/\n+/).map(value => value.trim()).filter(Boolean)) {
-        const paragraphLower = paragraph.toLowerCase();
-        const matchingWords = queryWords.filter(word => paragraphLower.includes(word));
-        const score = matchingWords.length * 4 + (lower.includes(paragraphLower) ? 8 : 0) + (paragraphLower.includes(queryWords.join(' ')) ? 10 : 0);
-        if (score > bestScore) {
-          bestScore = score;
-          bestParagraph = paragraph;
-        }
-      }
+    const guideSection = findGuideSection(attachedSystem.documents, userText);
+    if (guideSection) {
+      return `${attachedSystem.name} guide - ${guideSection.title}:\n${guideSection.lines.join('\n')}`;
     }
-    if (bestParagraph) return `${attachedSystem.name} guide: ${bestParagraph}`;
 
     for (const item of attachedSystem.knowledge) {
       if (item.keywords.some(kw => lower.includes(kw))) {

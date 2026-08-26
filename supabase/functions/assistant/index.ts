@@ -46,10 +46,32 @@ Deno.serve(async request => {
       .eq('system_id', tokenRecord.system_id);
 
     const words = message.toLowerCase().split(/\W+/).filter(word => word.length > 3);
-    const match = (documents ?? []).flatMap(document => document.content.split(/\n+/).map(paragraph => ({ document, paragraph })))
-      .find(item => words.some(word => item.paragraph.toLowerCase().includes(word)));
-    const reply = match
-      ? `${system?.name ?? 'System'} guide: ${match.paragraph.trim()}`
+    let bestSection: { title: string; lines: string[] } | null = null;
+    let bestScore = 0;
+    for (const document of documents ?? []) {
+      const sections: { title: string; lines: string[] }[] = [];
+      let currentSection: { title: string; lines: string[] } | null = null;
+      for (const line of document.content.split(/\r?\n/).map(value => value.trim()).filter(Boolean)) {
+        if (/^[A-Z][A-Z0-9 &'/-]{2,}$/.test(line)) {
+          currentSection = { title: line, lines: [] };
+          sections.push(currentSection);
+        } else if (currentSection) {
+          currentSection.lines.push(line);
+        }
+      }
+      for (const section of sections) {
+        const sectionText = `${section.title} ${section.lines.join(' ')}`.toLowerCase();
+        const matchingWords = words.filter(word => sectionText.includes(word));
+        const headingMatches = words.filter(word => section.title.toLowerCase().includes(word));
+        const score = matchingWords.length * 2 + headingMatches.length * 6;
+        if (score > bestScore) {
+          bestScore = score;
+          bestSection = section;
+        }
+      }
+    }
+    const reply = bestSection
+      ? `${system?.name ?? 'System'} guide - ${bestSection.title}:\n${bestSection.lines.join('\n')}`
       : `${system?.name ?? 'System'} received your message. No matching guide entry was found.`;
 
     return new Response(JSON.stringify({ reply }), {

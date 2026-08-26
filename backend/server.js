@@ -157,9 +157,34 @@ app.post('/api/assistant', async (request, response) => {
     admin.from('knowledge_documents').select('content').eq('system_id', tokenRecord.system_id)
   ]);
   const words = message.toLowerCase().split(/\W+/).filter(word => word.length > 3);
-  const paragraph = (documents || []).flatMap(document => document.content.split(/\n+/))
-    .find(value => words.some(word => value.toLowerCase().includes(word)));
-  response.json({ reply: paragraph ? `${system?.name || 'System'} guide: ${paragraph.trim()}` : `${system?.name || 'System'} received your message.` });
+  let bestSection = null;
+  let bestScore = 0;
+  for (const document of documents || []) {
+    const sections = [];
+    let currentSection = null;
+    for (const line of document.content.split(/\r?\n/).map(value => value.trim()).filter(Boolean)) {
+      if (/^[A-Z][A-Z0-9 &'/-]{2,}$/.test(line)) {
+        currentSection = { title: line, lines: [] };
+        sections.push(currentSection);
+      } else if (currentSection) {
+        currentSection.lines.push(line);
+      }
+    }
+    for (const section of sections) {
+      const sectionText = `${section.title} ${section.lines.join(' ')}`.toLowerCase();
+      const matchingWords = words.filter(word => sectionText.includes(word));
+      const headingMatches = words.filter(word => section.title.toLowerCase().includes(word));
+      const score = matchingWords.length * 2 + headingMatches.length * 6;
+      if (score > bestScore) {
+        bestScore = score;
+        bestSection = section;
+      }
+    }
+  }
+  const reply = bestSection
+    ? `${system?.name || 'System'} guide - ${bestSection.title}:\n${bestSection.lines.join('\n')}`
+    : `${system?.name || 'System'} received your message.`;
+  response.json({ reply });
 });
 
 if (process.env.NODE_ENV !== 'production') {
