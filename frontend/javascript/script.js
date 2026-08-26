@@ -829,12 +829,33 @@
     return document;
   }
 
+  function resetAttachedSystem() {
+    attachedSystem.documents = [];
+    attachedSystem.knowledge = [...defaultKnowledge];
+  }
+
   function attachMainDocument(fileName, text) {
     const document = { fileName, text };
     mainSystem.documents.push(document);
     mainSystem.knowledge.push(...createDocumentKnowledge(fileName, text));
     localStorage.setItem('nai-main-knowledge', JSON.stringify(mainSystem.documents));
+    rebuildMainKnowledge();
     return document;
+  }
+
+  function rebuildMainKnowledge() {
+    mainSystem.knowledge = [...defaultKnowledge];
+    mainSystem.documents.forEach(document => {
+      mainSystem.knowledge.push(...createDocumentKnowledge(document.fileName, document.text));
+    });
+    localStorage.setItem('nai-main-knowledge', JSON.stringify(mainSystem.documents));
+  }
+
+  function renderMainKnowledgeList() {
+    if (!mainKnowledgeList) return;
+    mainKnowledgeList.innerHTML = mainSystem.documents.length
+      ? mainSystem.documents.map((document, index) => `<article class="main-knowledge-item"><div class="flex items-center justify-between gap-3"><strong>${escapeHtml(document.fileName)}</strong><button type="button" class="admin-copy" data-main-remove="${index}">Remove</button></div><textarea class="admin-input admin-code mt-2" data-main-content="${index}">${escapeHtml(document.text)}</textarea><button type="button" class="admin-copy mt-2" data-main-save="${index}">Save changes</button></article>`).join('')
+      : '<p class="text-xs text-purple-100/50">No main knowledge files attached.</p>';
   }
 
   function addKnowledge(entries) {
@@ -995,6 +1016,8 @@
   const mainKnowledgeFile = document.getElementById('main-knowledge-file');
   const mainKnowledgeStatus = document.getElementById('main-knowledge-status');
   const mainKnowledgeDropzone = document.getElementById('main-knowledge-dropzone');
+  const mainKnowledgeList = document.getElementById('main-knowledge-list');
+  const replaceMainKnowledge = document.getElementById('replace-main-knowledge');
   const systemName = document.getElementById('system-name');
   const embedLink = document.getElementById('embed-link');
   const embedCode = document.getElementById('embed-code');
@@ -1031,6 +1054,7 @@
   let pendingSignup = false;
   let logoutTransitionActive = false;
   let authStateHandling = false;
+  let activeAdminRequestId = null;
 
   function setPendingVerification(email, password = null, nextView = 'login') {
     pendingVerification = { email, nextView, ...(password ? { password } : {}) };
@@ -1098,13 +1122,13 @@
       }
       const { data, error } = await supabaseClient
         .from('system_requests')
-        .select('id, system_name, message, status, embed_token_id, embed_link, knowledge_file_name')
+        .select('id, system_name, message, status, embed_token_id, embed_link, embed_code, knowledge_file_name')
         .eq('requester_id', user.id)
         .order('created_at', { ascending: false });
       if (!error) {
         document.getElementById('overview-request-count').textContent = data.length;
         requestList.innerHTML = data.length
-          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a>` : ''}</article>`).join('')
+          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a>${request.embed_code ? `<div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(request.embed_code)}</pre></div>` : ''}` : ''}</article>`).join('')
           : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
         content?.classList.remove('is-refreshing');
         return;
@@ -1132,7 +1156,7 @@
       return;
     }
     adminRequestList.innerHTML = data.length
-      ? data.map(request => `<article class="admin-request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-white">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-1 text-xs text-purple-200/55">For ${escapeHtml(request.email)}</p><p class="mt-2 text-xs text-purple-100/70">${escapeHtml(request.message)}</p>${request.knowledge_content ? `<pre class="mt-2">${escapeHtml(request.knowledge_content)}</pre>` : ''}${request.knowledge_file_name ? `<p class="mt-2 text-xs text-purple-200/50">Attached: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.status === 'pending' ? `<div class="admin-request-actions"><button type="button" class="admin-copy admin-approve" data-approve-request="${request.id}">Approve & send link</button><button type="button" class="admin-copy admin-reject" data-reject-request="${request.id}">Reject</button></div>` : request.embed_token_id ? '<p class="mt-2 text-xs text-emerald-200">Secure link created for requester.</p>' : ''}</article>`).join('')
+      ? data.map(request => `<article class="admin-request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-white">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-1 text-xs text-purple-200/55">For ${escapeHtml(request.email)}</p><p class="mt-2 text-xs text-purple-100/70">${escapeHtml(request.message)}</p>${request.knowledge_content ? `<pre class="mt-2">${escapeHtml(request.knowledge_content)}</pre>` : ''}${request.knowledge_file_name ? `<p class="mt-2 text-xs text-purple-200/50">Attached: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.status === 'pending' ? `<div class="admin-request-actions"><button type="button" class="admin-copy" data-review-request="${request.id}">Review in knowledge</button><button type="button" class="admin-copy admin-approve" data-approve-request="${request.id}">Approve & send link</button><button type="button" class="admin-copy admin-reject" data-reject-request="${request.id}">Reject</button></div>` : request.embed_token_id ? '<p class="mt-2 text-xs text-emerald-200">Secure link created for requester.</p>' : ''}</article>`).join('')
       : '<p class="text-xs text-purple-100/50">No requests yet.</p>';
     content?.classList.remove('is-refreshing');
   }
@@ -1599,12 +1623,13 @@
     showDashboardView('dashboard-access-view');
   });
 
-  async function createAdminLink(requestId) {
+  async function createAdminLink(requestId, overrides = {}) {
     const { data: request, error: requestError } = await supabaseClient
       .from('system_requests').select('id, requester_id, system_name, knowledge_content, knowledge_file_name').eq('id', requestId).single();
     if (requestError) throw requestError;
+    const finalSystemName = overrides.systemName?.trim() || request.system_name;
     const { data: system, error: systemError } = await supabaseClient
-      .from('systems').insert({ owner_id: request.requester_id, name: request.system_name }).select('id').single();
+      .from('systems').insert({ owner_id: request.requester_id, name: finalSystemName }).select('id').single();
     if (systemError) throw systemError;
     const rawToken = `${crypto.randomUUID()}-${crypto.randomUUID()}`;
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawToken));
@@ -1626,21 +1651,52 @@
       if (documentError) throw documentError;
     }
     const embedLink = `${window.location.origin}${window.location.pathname}#nai-token=${rawToken}`;
+    const embedCode = createEmbedCode(embedLink, finalSystemName);
     const { error: updateError } = await supabaseClient.from('system_requests').update({
-      status: 'approved', embed_token_id: token.id, embed_link: embedLink, updated_at: new Date().toISOString()
+      status: 'approved', embed_token_id: token.id, embed_link: embedLink, embed_code: embedCode, updated_at: new Date().toISOString()
     }).eq('id', requestId);
     if (updateError) throw updateError;
-    return embedLink;
+    return { embedLink, embedCode };
   }
 
   adminRequestList?.addEventListener('click', async event => {
+    const review = event.target.closest('[data-review-request]');
     const approve = event.target.closest('[data-approve-request]');
     const reject = event.target.closest('[data-reject-request]');
-    const requestId = approve?.dataset.approveRequest || reject?.dataset.rejectRequest;
+    const requestId = review?.dataset.reviewRequest || approve?.dataset.approveRequest || reject?.dataset.rejectRequest;
     if (!requestId || !supabaseClient) return;
     try {
+      if (review) {
+        const { data: request, error } = await supabaseClient
+          .from('system_requests')
+          .select('email, system_name, message, knowledge_content, knowledge_file_name')
+          .eq('id', requestId)
+          .single();
+        if (error) throw error;
+        activeAdminRequestId = requestId;
+        systemName.value = request.system_name || '';
+        requesterEmail.value = request.email || '';
+        resetAttachedSystem();
+        if (request.knowledge_content) {
+          attachDocument(request.knowledge_file_name || `${request.system_name}-knowledge.txt`, request.knowledge_content);
+          showAttachedFile({
+            name: request.knowledge_file_name || `${request.system_name}-knowledge.txt`,
+            size: new Blob([request.knowledge_content]).size
+          });
+        } else {
+          showKnowledgeMessage('No guide was included with this request.');
+        }
+        document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
+        showAdminView('admin-knowledge-view');
+        return;
+      }
       if (reject) await supabaseClient.from('system_requests').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', requestId);
-      if (approve) await navigator.clipboard.writeText(await createAdminLink(requestId));
+      if (approve) {
+        const { embedLink } = await createAdminLink(requestId, {
+          systemName: activeAdminRequestId === requestId ? systemName.value : ''
+        });
+        await navigator.clipboard.writeText(embedLink);
+      }
       await renderAdminRequests();
     } catch (error) {
       adminRequestList.insertAdjacentHTML('afterbegin', `<p class="text-xs text-rose-200">${escapeHtml(error.message)}</p>`);
@@ -1651,6 +1707,11 @@
     const bytes = new Uint8Array(18);
     crypto.getRandomValues(bytes);
     return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  function createEmbedCode(url, name) {
+    const safeName = name.replace(/["&<>]/g, '');
+    return `<iframe src="${url}" title="${safeName} NAI assistant" width="420" height="620" style="position:fixed;right:16px;bottom:16px;border:0;background:transparent" allow="clipboard-write"></iframe>`;
   }
 
   function showAdminView(viewId) {
@@ -1664,6 +1725,7 @@
     }
     if (viewId === 'admin-main-knowledge-view') {
       document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
+      renderMainKnowledgeList();
     }
     setTimeout(() => content?.classList.remove('is-refreshing'), 220);
   }
@@ -1745,6 +1807,26 @@
     await loadMainKnowledgeFile(file);
   });
 
+  mainKnowledgeList?.addEventListener('click', event => {
+    const saveButton = event.target.closest('[data-main-save]');
+    const removeButton = event.target.closest('[data-main-remove]');
+    const index = Number(saveButton?.dataset.mainSave ?? removeButton?.dataset.mainRemove);
+    if (!Number.isInteger(index) || !mainSystem.documents[index]) return;
+    if (saveButton) {
+      const editor = mainKnowledgeList.querySelector(`[data-main-content="${index}"]`);
+      mainSystem.documents[index].text = editor.value;
+      rebuildMainKnowledge();
+      mainKnowledgeStatus.textContent = `${mainSystem.documents[index].fileName} changes saved.`;
+    }
+    if (removeButton) {
+      mainSystem.documents.splice(index, 1);
+      rebuildMainKnowledge();
+      document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
+      mainKnowledgeStatus.textContent = 'Main knowledge file removed.';
+      renderMainKnowledgeList();
+    }
+  });
+
   function showKnowledgeMessage(message) {
     knowledgeStatus.classList.remove('has-file');
     knowledgeStatus.textContent = message;
@@ -1808,9 +1890,13 @@
         mainKnowledgeStatus.textContent = 'This file does not contain any knowledge.';
         return;
       }
+      if (replaceMainKnowledge.checked) {
+        mainSystem.documents = [];
+      }
       attachMainDocument(file.name, text);
       document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
       mainKnowledgeStatus.textContent = `${file.name} is now part of NAI knowledge.`;
+      renderMainKnowledgeList();
     } catch (error) {
       mainKnowledgeStatus.textContent = 'Could not read this file.';
     }
