@@ -801,9 +801,18 @@
   const sharedBehaviorKey = 'nai-shared-behavior';
   let sharedBehavior = localStorage.getItem(sharedBehaviorKey) || '';
 
+  function getSharedGreeting() {
+    const lines = sharedBehavior.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const exampleIndex = lines.findIndex(line => /^example\s*:/i.test(line));
+    if (exampleIndex === -1) return '';
+    const response = lines.slice(exampleIndex + 1).find(line => !/^[A-Z][A-Za-z ]+\s*:/i.test(line));
+    return response || '';
+  }
+
   function getSharedKnowledge() {
-    return sharedBehavior.trim()
-      ? [{ keywords: ['hello', 'hi', 'hey', 'greeting', 'morning', 'afternoon', 'evening'], response: sharedBehavior.trim() }]
+    const greeting = getSharedGreeting();
+    return greeting
+      ? [{ keywords: ['hello', 'hi', 'hey', 'greeting', 'morning', 'afternoon', 'evening'], response: greeting }]
       : [];
   }
 
