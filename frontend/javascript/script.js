@@ -1218,6 +1218,9 @@
     userDashboard.classList.remove('hidden');
     renderRequests();
     updateAuthStatus();
+    if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+      userDashboard.classList.add('hidden');
+    }
   }
 
   function showLogoutLoader(message) {
