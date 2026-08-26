@@ -724,6 +724,11 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     height: 2.8rem;
     font-size: 1.65rem;
   }
+
+  body:has(#user-dashboard:not(.hidden)) .nai-brand-mark {
+    right: 1rem;
+    left: auto;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {
