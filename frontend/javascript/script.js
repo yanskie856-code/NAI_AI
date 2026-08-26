@@ -1812,14 +1812,14 @@
   function toggleChat(open) {
     isChatOpen = open;
     if (open) {
-      positionChatCard();
       chatCard.classList.remove('hidden');
+      requestAnimationFrame(positionChatCard);
       setTimeout(() => {
-        chatCard.classList.remove('translate-y-8', 'opacity-0', 'scale-95');
+        chatCard.classList.remove('opacity-0', 'scale-95');
       }, 10);
       setExpression('happy', 1.5);
     } else {
-      chatCard.classList.add('translate-y-8', 'opacity-0', 'scale-95');
+      chatCard.classList.add('opacity-0', 'scale-95');
       setTimeout(() => {
         chatCard.classList.add('hidden');
       }, 300);
@@ -1832,13 +1832,18 @@
     const triggerRect = mascotTrigger.getBoundingClientRect();
     const cardWidth = Math.min(380, window.innerWidth - 24);
     const cardHeight = Math.min(520, window.innerHeight - 24);
-    const gap = 16;
+    const gap = 20;
     const left = Math.min(
       Math.max(12, triggerRect.right - cardWidth),
       window.innerWidth - cardWidth - 12
     );
     const aboveTop = triggerRect.top - cardHeight - gap;
-    const top = aboveTop >= 12 ? aboveTop : Math.min(triggerRect.bottom + gap, window.innerHeight - cardHeight - 12);
+    const belowTop = triggerRect.bottom + gap;
+    const top = aboveTop >= 12
+      ? aboveTop
+      : belowTop + cardHeight <= window.innerHeight - 12
+        ? belowTop
+        : Math.max(12, window.innerHeight - cardHeight - 12);
 
     chatCard.style.left = `${left}px`;
     chatCard.style.top = `${Math.max(12, top)}px`;
