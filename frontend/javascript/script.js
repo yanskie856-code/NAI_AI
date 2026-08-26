@@ -1283,6 +1283,11 @@
 
   document.getElementById('welcome-login').addEventListener('click', () => showAuthView('login'));
   document.getElementById('welcome-register').addEventListener('click', () => showAuthView('register'));
+  document.getElementById('welcome-admin').addEventListener('click', () => {
+    if (isChatOpen) toggleChat(false);
+    authScreen.classList.remove('hidden');
+    showAuthView('admin');
+  });
   document.getElementById('card-to-register').addEventListener('click', () => showAuthView('register'));
   document.getElementById('card-to-login').addEventListener('click', () => showAuthView('login'));
   async function submitAuth(mode) {
