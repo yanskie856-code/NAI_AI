@@ -1834,7 +1834,7 @@
     const cardHeight = Math.min(520, window.innerHeight - 24);
     const gap = 20;
     const left = Math.min(
-      Math.max(12, triggerRect.right - cardWidth),
+      Math.max(12, triggerRect.left),
       window.innerWidth - cardWidth - 12
     );
     const aboveTop = triggerRect.top - cardHeight - gap;
