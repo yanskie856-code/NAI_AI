@@ -943,10 +943,40 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 .request-group-heading h4 { color: rgba(236, 254, 255, 0.95); font-size: 0.82rem; font-weight: 700; }
 .request-group-heading p { margin-top: 0.2rem; color: rgba(165, 243, 252, 0.48); font-size: 0.66rem; }
 .request-group-heading > span { display: grid; min-width: 1.6rem; height: 1.6rem; place-items: center; border: 1px solid rgba(103, 232, 249, 0.2); border-radius: 999px; background: rgba(8, 145, 178, 0.12); color: #a5f3fc; font-size: 0.68rem; font-weight: 700; }
-.request-group-list { display: grid; gap: 0.75rem; }
+.request-group-list {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 0.45rem;
+  scrollbar-color: #a855f7 rgba(8, 47, 73, 0.38);
+  scrollbar-width: thin;
+}
+
+.request-group-list::-webkit-scrollbar {
+  width: 0.45rem;
+}
+
+.request-group-list::-webkit-scrollbar-track {
+  border: 1px solid rgba(103, 232, 249, 0.1);
+  border-radius: 999px;
+  background: rgba(8, 47, 73, 0.38);
+}
+
+.request-group-list::-webkit-scrollbar-thumb {
+  border: 1px solid rgba(236, 254, 255, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #22d3ee, #8b5cf6 52%, #f472b6);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.35);
+}
+
+.request-group-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #67e8f9, #a78bfa 52%, #f9a8d4);
+}
 
 @media (max-width: 760px) {
   .request-groups-grid { grid-template-columns: 1fr; }
+  .request-group-list { max-height: 20rem; }
 }
 
 @keyframes admin-panel-in {
