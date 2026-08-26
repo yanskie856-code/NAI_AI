@@ -1218,10 +1218,8 @@
     userDashboard.classList.remove('hidden');
     renderRequests();
     updateAuthStatus();
-    if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
-      userDashboard.classList.add('hidden');
-      toggleChat(true);
-    }
+    const savedView = sessionStorage.getItem('nai-dashboard-view');
+    if (savedView) showDashboardView(savedView);
   }
 
   function showLogoutLoader(message) {
@@ -1249,6 +1247,7 @@
     verificationMessage.textContent = '';
     passwordSetupMessage.textContent = '';
     clearPendingVerification();
+    sessionStorage.removeItem('nai-dashboard-view');
     Object.keys(sessionStorage).filter(key => key.startsWith('nai-google-verification-requested:')).forEach(key => sessionStorage.removeItem(key));
     Object.keys(sessionStorage).filter(key => key.startsWith('nai-custom-verified:')).forEach(key => sessionStorage.removeItem(key));
     localStorage.removeItem('nai-demo-user');
@@ -1284,6 +1283,7 @@
     content?.classList.add('is-refreshing');
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.toggle('hidden', view.id !== viewId));
     document.querySelectorAll('.dashboard-nav').forEach(button => button.classList.toggle('dashboard-nav-active', button.dataset.dashboardView === viewId));
+    sessionStorage.setItem('nai-dashboard-view', viewId);
     if (viewId === 'dashboard-access-view') renderRequests();
     setTimeout(() => content?.classList.remove('is-refreshing'), 220);
   }
