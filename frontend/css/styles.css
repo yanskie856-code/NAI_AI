@@ -29,12 +29,16 @@ body.embed-mode > .fixed.bottom-6.right-6 {
 
 .nai-widget {
   position: fixed !important;
+  inset: auto 1.5rem 1.5rem auto !important;
+  top: auto !important;
   right: 1.5rem !important;
   bottom: 1.5rem !important;
   left: auto !important;
 }
 
 body.embed-mode > .nai-widget {
+  inset: auto 1rem 1rem auto !important;
+  top: auto !important;
   right: 1rem !important;
   bottom: 1rem !important;
   left: auto !important;
