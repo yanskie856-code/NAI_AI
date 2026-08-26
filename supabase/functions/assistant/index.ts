@@ -71,8 +71,8 @@ Deno.serve(async request => {
       }
     }
     const reply = bestSection
-      ? `${system?.name ?? 'System'} guide - ${bestSection.title}:\n${bestSection.lines.join('\n')}`
-      : `${system?.name ?? 'System'} received your message. No matching guide entry was found.`;
+      ? `Here is what you need to know about ${bestSection.title.toLowerCase().replace(/\b\w/g, character => character.toUpperCase())}:\n\n${bestSection.lines.map(line => `- ${line}`).join('\n')}`
+      : `I could not find a matching detail in the attached guide. Try asking about a specific task or topic.`;
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

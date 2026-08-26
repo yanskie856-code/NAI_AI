@@ -862,6 +862,11 @@
     return bestSection;
   }
 
+  function formatGuideResponse(section) {
+    const title = section.title.toLowerCase().replace(/\b\w/g, character => character.toUpperCase());
+    return `Here is what you need to know about ${title}:\n\n${section.lines.map(line => `- ${line}`).join('\n')}`;
+  }
+
   function configureNAI(options = {}) {
     if (typeof options.name === 'string' && options.name.trim()) {
       attachedSystem.name = options.name.trim();
@@ -936,7 +941,7 @@
 
     const guideSection = findGuideSection(attachedSystem.documents, userText);
     if (guideSection) {
-      return `${attachedSystem.name} guide - ${guideSection.title}:\n${guideSection.lines.join('\n')}`;
+      return formatGuideResponse(guideSection);
     }
 
     for (const item of attachedSystem.knowledge) {
@@ -945,7 +950,7 @@
       }
     }
 
-    return `${attachedSystem.name} got your message: "${userText}"! I'm here monitoring everything to keep things running smoothly for you! ✨`;
+    return `I am here to help with your question about "${userText}". I could not find a matching detail in the attached guide.`;
   }
 
   // --- CHAT INTERFACE CONTROLS ---
@@ -1830,7 +1835,7 @@
     const inner = document.createElement('div');
     inner.className = sender === 'user'
       ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%]'
-      : 'bg-purple-900/40 border border-purple-500/30 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-slate-200';
+      : 'bg-purple-900/40 border border-purple-500/30 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-slate-200 whitespace-pre-line';
     
     inner.innerText = text;
     msgDiv.appendChild(inner);
