@@ -1122,13 +1122,13 @@
       }
       const { data, error } = await supabaseClient
         .from('system_requests')
-        .select('id, system_name, message, status, embed_token_id, embed_link, embed_code, knowledge_file_name')
+        .select('id, system_name, message, status, embed_token_id, embed_link, knowledge_file_name')
         .eq('requester_id', user.id)
         .order('created_at', { ascending: false });
       if (!error) {
         document.getElementById('overview-request-count').textContent = data.length;
         requestList.innerHTML = data.length
-          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a>${request.embed_code ? `<div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(request.embed_code)}</pre></div>` : ''}` : ''}</article>`).join('')
+          ? data.map(request => `<article class="request-item"><div class="flex items-center justify-between gap-3"><strong class="text-sm text-cyan-50">${escapeHtml(request.system_name)}</strong><span class="request-status">${escapeHtml(request.status)}</span></div><p class="mt-2 text-xs text-cyan-100/60">${escapeHtml(request.message)}</p>${request.knowledge_file_name ? `<p class="mt-1 text-xs text-cyan-100/45">Guide: ${escapeHtml(request.knowledge_file_name)}</p>` : ''}${request.embed_link ? `<a class="mt-2 block text-xs text-cyan-200 underline" href="${escapeHtml(request.embed_link)}">Open your NAI companion</a><div class="mt-3"><p class="text-xs font-semibold text-cyan-100/70">Implementation code</p><pre class="mt-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border border-cyan-300/15 bg-cyan-950/20 p-2 text-[10px] leading-relaxed text-cyan-100/70">${escapeHtml(createEmbedCode(request.embed_link, request.system_name))}</pre></div>` : ''}</article>`).join('')
           : '<p class="text-xs text-cyan-100/50">No requests yet.</p>';
         content?.classList.remove('is-refreshing');
         return;
@@ -1651,12 +1651,11 @@
       if (documentError) throw documentError;
     }
     const embedLink = `${window.location.origin}${window.location.pathname}#nai-token=${rawToken}`;
-    const embedCode = createEmbedCode(embedLink, finalSystemName);
     const { error: updateError } = await supabaseClient.from('system_requests').update({
-      status: 'approved', embed_token_id: token.id, embed_link: embedLink, embed_code: embedCode, updated_at: new Date().toISOString()
+      status: 'approved', embed_token_id: token.id, embed_link: embedLink, updated_at: new Date().toISOString()
     }).eq('id', requestId);
     if (updateError) throw updateError;
-    return { embedLink, embedCode };
+    return { embedLink };
   }
 
   adminRequestList?.addEventListener('click', async event => {

@@ -102,7 +102,6 @@ create table if not exists public.system_requests (
 alter table public.system_requests add column if not exists knowledge_content text not null default '';
 alter table public.system_requests add column if not exists knowledge_file_name text;
 alter table public.system_requests add column if not exists embed_link text;
-alter table public.system_requests add column if not exists embed_code text;
 
 alter table public.systems enable row level security;
 alter table public.knowledge_documents enable row level security;
