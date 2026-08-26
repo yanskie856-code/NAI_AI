@@ -1796,9 +1796,11 @@
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
       renderAdminRequests();
     }
+    if (viewId === 'admin-shared-knowledge-view') {
+      if (sharedBehaviorInput) sharedBehaviorInput.value = sharedBehavior;
+    }
     if (viewId === 'admin-main-knowledge-view') {
       document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
-      if (sharedBehaviorInput) sharedBehaviorInput.value = sharedBehavior;
       renderMainKnowledgeList();
     }
     setTimeout(() => content?.classList.remove('is-refreshing'), 220);
