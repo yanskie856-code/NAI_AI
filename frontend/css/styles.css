@@ -1048,10 +1048,11 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   .auth-welcome {
     min-height: 100svh;
     justify-content: flex-start;
-    padding: 26svh 1rem 12rem;
+    padding: 18svh 1rem 13rem;
   }
 
   .auth-welcome h1 {
+    margin-top: 0.9rem;
     font-size: clamp(2rem, 10vw, 3rem);
   }
 
@@ -1061,11 +1062,10 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   }
 
   .auth-action-bar {
-    bottom: calc(1rem + env(safe-area-inset-bottom));
+    bottom: calc(6.5rem + env(safe-area-inset-bottom));
     left: 1rem;
-    right: auto;
-    width: calc(100% - 12rem);
-    max-width: 13rem;
+    width: calc(100% - 2rem);
+    max-width: 26rem;
     flex-direction: column;
     gap: 0.5rem;
     transform: none;
@@ -1073,6 +1073,81 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 
   .auth-action-bar button {
     min-height: 3.25rem;
+  }
+
+  #welcome-admin {
+    margin-top: 1.25rem;
+  }
+
+  body:not(.embed-mode) .nai-widget {
+    right: 1rem !important;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    width: auto;
+  }
+
+  body:not(.embed-mode) #mascot-trigger {
+    width: 7rem;
+    height: 7rem;
+  }
+
+  .user-dashboard .admin-header {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .user-dashboard .dashboard-header-copy {
+    padding-inline: 0;
+    text-align: left;
+  }
+
+  .user-dashboard .dashboard-header-copy h2 {
+    font-size: 1.65rem;
+  }
+
+  .user-dashboard .dashboard-header-copy p:last-child {
+    max-width: 18rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .user-dashboard .admin-header > div:last-child {
+    justify-content: flex-start;
+  }
+
+  .user-dashboard > .admin-panel > .grid {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .user-dashboard .dashboard-sidebar {
+    display: grid;
+    gap: 0.35rem;
+    border: 1px solid rgba(103, 232, 249, 0.14);
+    border-radius: 0.85rem;
+    background: rgba(8, 27, 38, 0.46);
+    padding: 0.7rem;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .user-dashboard .dashboard-sidebar > p {
+    margin: 0 0 0.25rem;
+  }
+
+  .user-dashboard .dashboard-nav {
+    display: flex;
+    width: 100%;
+    min-height: 2.75rem;
+    align-items: center;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    white-space: normal;
+  }
+
+  .user-dashboard .dashboard-content {
+    width: 100%;
   }
 
   .auth-form-card {
