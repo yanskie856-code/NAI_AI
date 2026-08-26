@@ -1164,7 +1164,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     bottom: 0;
     z-index: 5;
     display: grid;
-    width: min(17rem, 82vw);
+    width: min(14rem, 72vw);
     gap: 0.2rem;
     border: 1px solid rgba(103, 232, 249, 0.14);
     border-top: 0;
@@ -1172,7 +1172,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     border-bottom: 0;
     border-radius: 0.85rem;
     background: rgba(8, 27, 38, 0.46);
-    padding: 0.85rem;
+    padding: 0.65rem;
     box-shadow: -20px 0 45px rgba(0, 0, 0, 0.35);
     overflow-y: auto;
     white-space: normal;
@@ -1186,7 +1186,7 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 
   .user-dashboard .dashboard-sidebar-heading {
     align-items: center;
-    min-height: 2.25rem;
+    min-height: 2rem;
   }
 
   .user-dashboard .dashboard-sidebar-heading p {
@@ -1222,8 +1222,8 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
 
   .user-dashboard .dashboard-menu-close {
     display: grid;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2rem;
+    height: 2rem;
     place-items: center;
     border: 1px solid rgba(103, 232, 249, 0.16);
     border-radius: 0.6rem;
@@ -1255,10 +1255,10 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   .user-dashboard .dashboard-nav {
     display: flex;
     width: 100%;
-    min-height: 2.75rem;
+    min-height: 2.3rem;
     align-items: center;
     margin: 0;
-    padding: 0.65rem 0.75rem;
+    padding: 0.5rem 0.65rem;
     white-space: normal;
   }
 
@@ -1266,7 +1266,9 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
     display: inline-flex;
     width: 100%;
     justify-content: center;
-    margin-top: 0.45rem;
+    min-height: 2.3rem;
+    margin-top: 0.3rem;
+    padding: 0.5rem 0.65rem;
   }
 
   .user-dashboard .dashboard-content {
