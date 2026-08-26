@@ -793,6 +793,7 @@
   // --- NAI KNOWLEDGE SYSTEM ---
   const defaultKnowledge = [
     { keywords: ['hello', 'hi', 'hey', 'start', 'nai'], response: "Yay! Hi friend! I am NAI, your sweet helper assistant! How can I make your day easier?" },
+    { keywords: ['fine', 'good', 'great', 'okay', 'well', 'awesome'], response: "That’s wonderful to hear! I’m glad your day is going well. How can I help you today?" },
     { keywords: ['who are you', 'what are you', 'identity'], response: "I'm NAI! Your cute AI companion designed to keep you company and guide you through the system! ✨" },
     { keywords: ['settings', 'config', 'profile'], response: "Looking for settings? You can tap your profile icon right up at the top right corner! ⚙️" },
     { keywords: ['help', 'guide', 'support'], response: "I'm right here for you! You can ask me about updates, system shortcuts, or troubleshooting! 💕" },
