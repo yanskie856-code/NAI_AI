@@ -864,7 +864,7 @@
 
   function formatGuideResponse(section) {
     const title = section.title.toLowerCase().replace(/\b\w/g, character => character.toUpperCase());
-    return `Here is what you need to know about ${title}:\n\n${section.lines.map(line => `- ${line}`).join('\n')}`;
+    return `Here’s the relevant guidance for ${title}.\n\n${section.lines.map(line => `- ${line}`).join('\n')}`;
   }
 
   function configureNAI(options = {}) {
@@ -956,6 +956,7 @@
   // --- CHAT INTERFACE CONTROLS ---
   const chatCard = document.getElementById('chat-card');
   const mascotTrigger = document.getElementById('mascot-trigger');
+  const chatWidget = document.getElementById('chat-widget');
   const closeChat = document.getElementById('close-chat');
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
@@ -1811,6 +1812,7 @@
   function toggleChat(open) {
     isChatOpen = open;
     if (open) {
+      positionChatCard();
       chatCard.classList.remove('hidden');
       setTimeout(() => {
         chatCard.classList.remove('translate-y-8', 'opacity-0', 'scale-95');
@@ -1825,8 +1827,30 @@
     }
   }
 
+  function positionChatCard() {
+    if (!chatWidget || !chatCard || !mascotTrigger) return;
+    const triggerRect = mascotTrigger.getBoundingClientRect();
+    const cardWidth = Math.min(380, window.innerWidth - 24);
+    const cardHeight = Math.min(520, window.innerHeight - 24);
+    const gap = 16;
+    const left = Math.min(
+      Math.max(12, triggerRect.right - cardWidth),
+      window.innerWidth - cardWidth - 12
+    );
+    const aboveTop = triggerRect.top - cardHeight - gap;
+    const top = aboveTop >= 12 ? aboveTop : Math.min(triggerRect.bottom + gap, window.innerHeight - cardHeight - 12);
+
+    chatCard.style.left = `${left}px`;
+    chatCard.style.top = `${Math.max(12, top)}px`;
+    chatCard.style.width = `${cardWidth}px`;
+    chatCard.style.height = `${cardHeight}px`;
+  }
+
   mascotTrigger.addEventListener('click', () => toggleChat(!isChatOpen));
   closeChat.addEventListener('click', () => toggleChat(false));
+  window.addEventListener('resize', () => {
+    if (isChatOpen) positionChatCard();
+  });
 
   function appendMessage(text, sender = 'bot') {
     const msgDiv = document.createElement('div');

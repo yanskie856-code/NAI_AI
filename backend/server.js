@@ -182,7 +182,7 @@ app.post('/api/assistant', async (request, response) => {
     }
   }
   const reply = bestSection
-    ? `Here is what you need to know about ${bestSection.title.toLowerCase().replace(/\b\w/g, character => character.toUpperCase())}:\n\n${bestSection.lines.map(line => `- ${line}`).join('\n')}`
+    ? `Here’s the relevant guidance for ${bestSection.title.toLowerCase().replace(/\b\w/g, character => character.toUpperCase())}.\n\n${bestSection.lines.map(line => `- ${line}`).join('\n')}`
     : `I could not find a matching detail in the attached guide. Try asking about a specific task or topic.`;
   response.json({ reply });
 });
