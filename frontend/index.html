@@ -251,6 +251,7 @@
         <aside class="admin-sidebar">
           <p class="mb-3 text-[10px] uppercase tracking-[0.18em] text-pink-200/50">Admin workspace</p>
           <button class="admin-nav admin-nav-active" type="button" data-admin-view="admin-overview-view">Overview</button>
+          <button class="admin-nav" type="button" data-admin-view="admin-main-knowledge-view">NAI knowledge</button>
           <button class="admin-nav" type="button" data-admin-view="admin-knowledge-view">Knowledge</button>
           <button class="admin-nav" type="button" data-admin-view="admin-links-view">Embed links</button>
         </aside>
@@ -269,6 +270,14 @@
             <div class="admin-request-inbox">
               <div class="flex items-center justify-between gap-3"><h3 class="text-sm font-semibold text-white">Incoming requests</h3><button id="refresh-admin-requests" type="button" class="admin-copy">Refresh</button></div>
               <div id="admin-request-list" class="mt-4 space-y-3"><p class="text-xs text-purple-100/50">No requests loaded.</p></div>
+            </div>
+          </section>
+
+          <section id="admin-main-knowledge-view" class="admin-view hidden space-y-4">
+            <div class="admin-section">
+              <div><h3 class="text-lg font-semibold text-white">NAI knowledge</h3><p class="mt-1 text-sm text-purple-100/60">Attach knowledge for the main NAI system. Client systems keep their own separate guides.</p></div>
+              <div class="admin-metric mt-4"><span>Main guide files</span><strong id="main-knowledge-count">0</strong></div>
+              <label id="main-knowledge-dropzone" class="admin-upload knowledge-dropzone mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-purple-400/40 bg-purple-950/30 p-6 text-center hover:border-pink-400/70 transition"><span class="knowledge-upload-icon text-2xl text-pink-300">+</span><span class="text-sm font-medium text-purple-100">Drop a TXT or DOCX guide here</span><span class="text-xs text-purple-300/60">This knowledge is used by the main NAI only, up to 5 MB</span><div id="main-knowledge-status" class="knowledge-status min-h-6 text-xs text-purple-200/70" aria-live="polite">No main guide attached yet.</div><input id="main-knowledge-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" /></label>
             </div>
           </section>
 

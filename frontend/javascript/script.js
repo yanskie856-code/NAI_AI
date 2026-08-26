@@ -806,6 +806,13 @@
     getContext: null,
     respond: null
   };
+  const mainSystem = {
+    name: 'NAI Assistant',
+    knowledge: [...defaultKnowledge],
+    documents: []
+  };
+  const embedToken = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
+  const isClientEmbed = Boolean(embedToken);
 
   function createDocumentKnowledge(fileName, text) {
     const paragraphs = text.split(/\n+/).map(part => part.trim()).filter(Boolean);
@@ -822,12 +829,34 @@
     return document;
   }
 
+  function attachMainDocument(fileName, text) {
+    const document = { fileName, text };
+    mainSystem.documents.push(document);
+    mainSystem.knowledge.push(...createDocumentKnowledge(fileName, text));
+    localStorage.setItem('nai-main-knowledge', JSON.stringify(mainSystem.documents));
+    return document;
+  }
+
   function addKnowledge(entries) {
     if (!Array.isArray(entries)) return;
 
     attachedSystem.knowledge.push(...entries.filter(entry =>
       Array.isArray(entry.keywords) && typeof entry.response === 'string'
     ));
+  }
+
+  try {
+    const savedMainKnowledge = JSON.parse(localStorage.getItem('nai-main-knowledge') || '[]');
+    if (Array.isArray(savedMainKnowledge)) {
+      savedMainKnowledge.forEach(document => {
+        if (document?.fileName && typeof document.text === 'string') {
+          mainSystem.documents.push(document);
+          mainSystem.knowledge.push(...createDocumentKnowledge(document.fileName, document.text));
+        }
+      });
+    }
+  } catch (error) {
+    console.warn('Main NAI knowledge could not be restored.');
   }
 
   function findGuideSection(documents, message) {
@@ -900,7 +929,6 @@
   };
 
   async function getNAIResponse(userText) {
-    const embedToken = new URLSearchParams(window.location.hash.slice(1)).get('nai-token');
     if (embedToken && supabaseConfig.backendUrl) {
       try {
         const controller = new AbortController();
@@ -939,12 +967,12 @@
       }
     }
 
-    const guideSection = findGuideSection(attachedSystem.documents, userText);
+    const guideSection = findGuideSection(isClientEmbed ? attachedSystem.documents : mainSystem.documents, userText);
     if (guideSection) {
       return formatGuideResponse(guideSection);
     }
 
-    for (const item of attachedSystem.knowledge) {
+    for (const item of (isClientEmbed ? attachedSystem.knowledge : mainSystem.knowledge)) {
       if (item.keywords.some(kw => lower.includes(kw))) {
         return item.response;
       }
@@ -964,6 +992,9 @@
   const adminPortal = document.getElementById('admin-portal');
   const knowledgeFile = document.getElementById('knowledge-file');
   const knowledgeStatus = document.getElementById('knowledge-status');
+  const mainKnowledgeFile = document.getElementById('main-knowledge-file');
+  const mainKnowledgeStatus = document.getElementById('main-knowledge-status');
+  const mainKnowledgeDropzone = document.getElementById('main-knowledge-dropzone');
   const systemName = document.getElementById('system-name');
   const embedLink = document.getElementById('embed-link');
   const embedCode = document.getElementById('embed-code');
@@ -1631,6 +1662,9 @@
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
       renderAdminRequests();
     }
+    if (viewId === 'admin-main-knowledge-view') {
+      document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
+    }
     setTimeout(() => content?.classList.remove('is-refreshing'), 220);
   }
 
@@ -1705,6 +1739,12 @@
     await loadKnowledgeFile(file);
   });
 
+  mainKnowledgeFile?.addEventListener('change', async () => {
+    const file = mainKnowledgeFile.files[0];
+    if (!file) return;
+    await loadMainKnowledgeFile(file);
+  });
+
   function showKnowledgeMessage(message) {
     knowledgeStatus.classList.remove('has-file');
     knowledgeStatus.textContent = message;
@@ -1754,6 +1794,28 @@
     }
   }
 
+  async function loadMainKnowledgeFile(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      mainKnowledgeStatus.textContent = 'File is larger than 5 MB.';
+      return;
+    }
+
+    try {
+      const text = file.name.toLowerCase().endsWith('.docx')
+        ? (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value
+        : await file.text();
+      if (!text.trim()) {
+        mainKnowledgeStatus.textContent = 'This file does not contain any knowledge.';
+        return;
+      }
+      attachMainDocument(file.name, text);
+      document.getElementById('main-knowledge-count').textContent = mainSystem.documents.length;
+      mainKnowledgeStatus.textContent = `${file.name} is now part of NAI knowledge.`;
+    } catch (error) {
+      mainKnowledgeStatus.textContent = 'Could not read this file.';
+    }
+  }
+
   knowledgeDropzone?.addEventListener('dragover', event => {
     event.preventDefault();
     knowledgeDropzone.classList.add('is-dragging');
@@ -1765,6 +1827,19 @@
     const file = [...event.dataTransfer.files].find(item => /\.(txt|docx)$/i.test(item.name));
     if (file) await loadKnowledgeFile(file);
     else showKnowledgeMessage('Choose a TXT or DOCX guide.');
+  });
+
+  mainKnowledgeDropzone?.addEventListener('dragover', event => {
+    event.preventDefault();
+    mainKnowledgeDropzone.classList.add('is-dragging');
+  });
+  mainKnowledgeDropzone?.addEventListener('dragleave', () => mainKnowledgeDropzone.classList.remove('is-dragging'));
+  mainKnowledgeDropzone?.addEventListener('drop', async event => {
+    event.preventDefault();
+    mainKnowledgeDropzone.classList.remove('is-dragging');
+    const file = [...event.dataTransfer.files].find(item => /\.(txt|docx)$/i.test(item.name));
+    if (file) await loadMainKnowledgeFile(file);
+    else mainKnowledgeStatus.textContent = 'Choose a TXT or DOCX guide.';
   });
 
   document.getElementById('generate-link').addEventListener('click', async () => {
