@@ -12,5 +12,10 @@ export function initUserDashboard({ renderRequests, showDashboardView }) {
     showDashboardView('dashboard-access-view');
   });
 
+  document.getElementById('dashboard-rejected-nav')?.addEventListener('click', () => {
+    renderRequests();
+    showDashboardView('dashboard-rejected-view');
+  });
+
   document.getElementById('refresh-requests')?.addEventListener('click', renderRequests);
 }

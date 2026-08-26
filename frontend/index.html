@@ -55,7 +55,7 @@
       <p class="auth-card-copy">Authenticate to manage connected systems and embed access.</p>
       <form id="admin-login-form" class="space-y-3">
         <label class="auth-field">Admin email<input id="admin-login-email" name="email" type="email" required autocomplete="username" placeholder="admin@example.com" class="admin-input" /></label>
-        <label class="auth-field">Password<input id="admin-login-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password" class="admin-input" /></label>
+        <label class="auth-field">Password<span class="auth-password-field"><input id="admin-login-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password" class="admin-input" /><button id="admin-password-toggle" type="button" class="auth-password-toggle" aria-label="Show admin password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></button></span></label>
         <button type="submit" class="auth-primary admin-login-submit"><span>Enter control room</span><span class="admin-login-arrow" aria-hidden="true">&#8594;</span></button>
       </form>
       <button id="admin-to-login" type="button" class="auth-switch">Back to user login</button>
@@ -194,6 +194,7 @@
           <button class="dashboard-nav dashboard-nav-active" type="button" data-dashboard-view="dashboard-overview-view">Overview</button>
           <button class="dashboard-nav" type="button" id="dashboard-request-nav" data-dashboard-view="dashboard-request-view">Request system</button>
           <button class="dashboard-nav" type="button" id="dashboard-refresh-nav" data-dashboard-view="dashboard-access-view">Access requests</button>
+          <button class="dashboard-nav" type="button" id="dashboard-rejected-nav" data-dashboard-view="dashboard-rejected-view">Rejected requests</button>
         </aside>
         <div class="dashboard-content">
         <section id="dashboard-overview-view" class="dashboard-view dashboard-section space-y-4">
@@ -231,6 +232,10 @@
             <p class="text-xs text-cyan-100/50">No requests yet.</p>
           </div>
         </section>
+        <section id="dashboard-rejected-view" class="dashboard-view dashboard-section hidden">
+          <div><h3 class="text-sm font-semibold text-white">Rejected requests</h3><p class="mt-1 text-xs text-cyan-100/55">Review requests that need changes before sending them again.</p></div>
+          <div id="rejected-request-list" class="mt-4 space-y-3"><p class="text-xs text-cyan-100/50">No rejected requests.</p></div>
+        </section>
         </div>
       </div>
     </div>
@@ -245,7 +250,6 @@
           <h2 class="mt-1 text-2xl font-bold text-white">Attach a system</h2>
           <p class="mt-2 text-sm text-purple-200/70">Load the system guide, create an embed key, and connect NAI to your app.</p>
         </div>
-        <button id="close-admin" type="button" aria-label="Close admin portal" class="text-purple-300/60 hover:text-white p-2 rounded-lg hover:bg-purple-900/50 transition">&#10005;</button>
       </div>
 
       <div class="admin-layout grid gap-6 p-4 sm:p-6 lg:grid-cols-[190px_1fr]">

@@ -1031,6 +1031,7 @@
   const requestForm = document.getElementById('system-request-form');
   const requestStatus = document.getElementById('request-status');
   const requestList = document.getElementById('request-list');
+  const rejectedRequestList = document.getElementById('rejected-request-list');
   const adminRequestList = document.getElementById('admin-request-list');
   const supabaseConfig = window.NAI_SUPABASE_CONFIG || {};
   const supabaseClient = supabaseConfig.url && supabaseConfig.anonKey && window.supabase
@@ -1129,14 +1130,16 @@
         .order('created_at', { ascending: false });
       if (!error) {
         document.getElementById('overview-request-count').textContent = data.length;
-        requestList.innerHTML = renderRequestGroups(data, 'system_name', 'embed_link');
+        requestList.innerHTML = renderRequestGroups(data.filter(request => request.status !== 'rejected'), 'system_name', 'embed_link');
+        rejectedRequestList.innerHTML = renderRequestGroups(data.filter(request => request.status === 'rejected'), 'system_name', 'embed_link');
         content?.classList.remove('is-refreshing');
         return;
       }
     }
     const requests = JSON.parse(localStorage.getItem('nai-demo-requests') || '[]');
     document.getElementById('overview-request-count').textContent = requests.length;
-    requestList.innerHTML = renderRequestGroups(requests, 'system', 'embedLink');
+    requestList.innerHTML = renderRequestGroups(requests.filter(request => request.status !== 'rejected'), 'system', 'embedLink');
+    rejectedRequestList.innerHTML = renderRequestGroups(requests.filter(request => request.status === 'rejected'), 'system', 'embedLink');
     content?.classList.remove('is-refreshing');
   }
 
@@ -1505,6 +1508,15 @@
     showAdminView('admin-overview-view');
   }
 
+  document.getElementById('admin-password-toggle')?.addEventListener('click', event => {
+    const button = event.currentTarget;
+    const passwordInput = document.getElementById('admin-login-password');
+    const isVisible = passwordInput.type === 'text';
+    passwordInput.type = isVisible ? 'password' : 'text';
+    button.setAttribute('aria-label', isVisible ? 'Show admin password' : 'Hide admin password');
+    button.setAttribute('aria-pressed', String(!isVisible));
+  });
+
   document.getElementById('admin-login-form').addEventListener('submit', event => {
     event.preventDefault();
     submitAdminAuth();
@@ -1814,7 +1826,7 @@
 
   loadAttachedSystemFromToken();
 
-  document.getElementById('close-admin').addEventListener('click', () => {
+  document.getElementById('close-admin')?.addEventListener('click', () => {
     adminPortal.classList.add('hidden');
   });
 
