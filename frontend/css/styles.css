@@ -23,8 +23,8 @@ body.embed-mode > .fixed.bottom-6.right-6 {
   right: 1rem !important;
   left: auto !important;
   bottom: 1rem !important;
-  width: 420px;
-  height: 620px;
+  width: auto;
+  height: auto;
 }
 
 .nai-widget {

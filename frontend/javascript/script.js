@@ -866,18 +866,20 @@
     ));
   }
 
-  try {
-    const savedMainKnowledge = JSON.parse(localStorage.getItem('nai-main-knowledge') || '[]');
-    if (Array.isArray(savedMainKnowledge)) {
-      savedMainKnowledge.forEach(document => {
-        if (document?.fileName && typeof document.text === 'string') {
-          mainSystem.documents.push(document);
-          mainSystem.knowledge.push(...createDocumentKnowledge(document.fileName, document.text));
-        }
-      });
+  if (!isClientEmbed) {
+    try {
+      const savedMainKnowledge = JSON.parse(localStorage.getItem('nai-main-knowledge') || '[]');
+      if (Array.isArray(savedMainKnowledge)) {
+        savedMainKnowledge.forEach(document => {
+          if (document?.fileName && typeof document.text === 'string') {
+            mainSystem.documents.push(document);
+            mainSystem.knowledge.push(...createDocumentKnowledge(document.fileName, document.text));
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Main NAI knowledge could not be restored.');
     }
-  } catch (error) {
-    console.warn('Main NAI knowledge could not be restored.');
   }
 
   function findGuideSection(documents, message) {
