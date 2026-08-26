@@ -1686,6 +1686,7 @@
       attachDocument(file.name, text);
       document.getElementById('admin-knowledge-count').textContent = attachedSystem.documents.length;
       knowledgeStatus.textContent = `${file.name} attached (${text.length.toLocaleString()} characters).`;
+      knowledgeDropzone.classList.add('has-file');
     } catch (error) {
       knowledgeStatus.textContent = 'Could not read this file.';
     }

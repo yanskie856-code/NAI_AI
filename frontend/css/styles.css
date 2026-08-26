@@ -35,6 +35,32 @@ body.embed-mode.embed-conversation > .fixed.bottom-6.right-6 #mascot-trigger { d
   box-shadow: 0 0 24px rgba(34, 211, 238, 0.14);
 }
 
+.knowledge-upload-status {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(165, 243, 252, 0.14);
+  border-radius: 999px;
+  background: rgba(8, 47, 73, 0.34);
+  color: rgba(207, 250, 254, 0.62);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.knowledge-dropzone.has-file .knowledge-upload-icon {
+  color: #67e8f9;
+}
+
+.knowledge-dropzone.has-file .knowledge-upload-status {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(6, 78, 59, 0.3);
+  color: #a7f3d0;
+}
+
 .nai-preloader {
   position: fixed;
   inset: 0;
