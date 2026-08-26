@@ -1214,18 +1214,12 @@
   }
 
   function showDashboard() {
-    const navigationType = performance.getEntriesByType('navigation')[0]?.type;
     const savedView = sessionStorage.getItem('nai-dashboard-view') || 'dashboard-overview-view';
     sessionStorage.setItem('nai-dashboard-view', savedView);
     authScreen.classList.add('hidden');
+    userDashboard.classList.remove('hidden');
     renderRequests();
     updateAuthStatus();
-    if (navigationType === 'reload') {
-      userDashboard.classList.add('hidden');
-      toggleChat(true);
-      return;
-    }
-    userDashboard.classList.remove('hidden');
     showDashboardView(savedView);
   }
 
