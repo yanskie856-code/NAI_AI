@@ -960,6 +960,7 @@
   };
 
   async function getNAIResponse(userText) {
+    const lower = userText.toLowerCase();
     if (embedToken && supabaseConfig.backendUrl) {
       try {
         const controller = new AbortController();
